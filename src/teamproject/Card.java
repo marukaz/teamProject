@@ -27,7 +27,7 @@ public class Card {
         return suit;
     }
     
-    public int getNumber(){
+    public int getNum(){
         return number;
     }
     

@@ -16,15 +16,19 @@ public class Field {
         this.cards = new ArrayList<>();
     }
     
-    public void addCard(Card card){
-        cards.add(0,card);
+    public void addCard(List<Card> card){
+        cards.addAll(card);
     }
     
-    public List<Card> fieldCards(){
+    public List<Card> cards(){
         return cards;
     }
     
-    public void clearField(){
+    public Card getLastCard(){
+        return cards.get(cards.size()-1);
+    }
+    
+    public void clear(){
         cards.clear();
     }
 }

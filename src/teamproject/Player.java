@@ -16,14 +16,25 @@ public class Player {
         this.hand = new ArrayList<>();
     }
     
-    public void getCard(Card card){
+    public void drawCard(Card card){
         hand.add(card);
     }
     
-    public Card leaveCard(int arrayNumber){
-        return hand.remove(arrayNumber);
+    public List<Card> leaveCard(int... arrayNumber){
+        List<Card> cards = new ArrayList<>();
+        for(int i=0; i<arrayNumber.length;i++){
+            cards.add(hand.get(arrayNumber[i]));
+        }
+        for(int i=arrayNumber.length; i>0;i--){
+            Arrays.sort(arrayNumber);
+            hand.remove(arrayNumber[i-1]);
+        }
+        return cards;
     }
     
+    public Card seeCard(int n){
+        return hand.get(n);
+    }
     public List<Card> handCards(){
         return hand;
     }

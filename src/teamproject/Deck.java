@@ -22,7 +22,7 @@ public class Deck {
     
     public void deckMake(){
         for(Suit s : Suit.values()){
-            for(int k=0;k<Card.NUMBERKIND;k++){
+            for(int k=1;k<=Card.NUMBERKIND;k++){
                 if(s == Suit.JOKER){
                     break;
                 }else{
@@ -32,7 +32,8 @@ public class Deck {
         }
         
         for(int i=0;i<joker;i++){
-            deck.add(new Card(Suit.JOKER,-1));
+            
+            deck.add(new Card(Suit.JOKER,99));
         }
         
         Collections.shuffle(deck);
