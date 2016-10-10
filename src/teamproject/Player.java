@@ -20,7 +20,7 @@ abstract class Player {
         hand.add(card);
     }
     
-    public List<Card> leaveCard(int... arrayNumber){
+    public List<Card> leaveCard(int[] arrayNumber){
         List<Card> cards = new ArrayList<>();
         for(int i=0; i<arrayNumber.length;i++){
             cards.add(hand.get(arrayNumber[i]));
@@ -49,5 +49,5 @@ abstract class Player {
         return hand;
     }
     
-    abstract String[] chooseCard();
+    abstract int[] chooseCard();
 }

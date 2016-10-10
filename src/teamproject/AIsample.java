@@ -12,11 +12,13 @@ package teamproject;
 public class AIsample extends Player{
 
     @Override
-    String[] chooseCard() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    int[] chooseCard() {
+        int num = TheRichest.numOfCards;
+        int[] chosen = new int[num];
+        for(int i=0;i<num;i++){
+            chosen[i] = (int) (Math.random() * hand.size())-1;
+        }
+        return chosen;
     }
-
-  
-    
-    
+        
 }
