@@ -16,7 +16,7 @@ public class Card {
     public static final int NUMBERKIND = 13;
     
     private Suit suit;
-    private int number;
+    protected int number;
     
     public Card(Suit suit, int number){
         this.suit = suit;

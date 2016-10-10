@@ -28,6 +28,11 @@ public class Field {
         return cards.get(cards.size()-1);
     }
     
+    public List<Card> getLastCard(int numOfCards){
+        int last = cards.size();
+        return new ArrayList<>(cards.subList(last-numOfCards, last));
+    }
+    
     public void clear(){
         cards.clear();
     }
