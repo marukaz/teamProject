@@ -16,7 +16,7 @@ public class Deck {
     private int joker;
  
     public Deck(int joker){
-        this.deck = new ArrayList<>();
+        this.deck = new ArrayList<Card>();
         this.joker = joker;
     }
     

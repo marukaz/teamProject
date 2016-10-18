@@ -13,7 +13,7 @@ abstract class Player {
     public List<Card> hand;
     
     public Player(){
-        this.hand = new ArrayList<>();
+        this.hand = new ArrayList<Card>();
     }
     
     public void drawCard(Card card){
@@ -21,7 +21,7 @@ abstract class Player {
     }
     
     public List<Card> leaveCard(int[] arrayNumber){
-        List<Card> cards = new ArrayList<>();
+        List<Card> cards = new ArrayList<Card>();
         for(int i=0; i<arrayNumber.length;i++){
             cards.add(hand.get(arrayNumber[i]));
         }
@@ -38,7 +38,7 @@ abstract class Player {
     }
     
     public List<Card> seeCard(int[] n){
-        List<Card> cards = new ArrayList<>();
+        List<Card> cards = new ArrayList<Card>();
         for(int i=0; i<n.length; i++){
             cards.add(hand.get(n[i]));
         }

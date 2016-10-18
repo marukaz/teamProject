@@ -13,7 +13,7 @@ public class Field {
     private List<Card> cards;
     
     public Field(){
-        this.cards = new ArrayList<>();
+        this.cards = new ArrayList<Card>();
     }
     
     public void addCard(List<Card> card){
@@ -30,7 +30,7 @@ public class Field {
     
     public List<Card> getLastCard(int numOfCards){
         int last = cards.size();
-        return new ArrayList<>(cards.subList(last-numOfCards, last));
+        return new ArrayList<Card>(cards.subList(last-numOfCards, last));
     }
     
     public void clear(){
