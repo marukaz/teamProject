@@ -11,11 +11,11 @@ package teamproject;
  */
 public enum Suit {
 
-    SPADE("♠"),
-    DIAMOND("♦"),
-    CLUB("♣"),
-    HEART("♥"),
-    JOKER("JOKER");
+    SPADE("S"),
+    DIAMOND("D"),
+    CLUB("C"),
+    HEART("H"),
+    JOKER("JK");
 
     private String name;
 

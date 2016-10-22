@@ -9,16 +9,21 @@ package teamproject;
  *
  * @author matsumaru
  */
-public class AIsample extends Player{
+public class AIsample extends Player {
 
     @Override
     int[] chooseCard() {
-        int num = TheRichest.numOfCards;
-        int[] chosen = new int[num];
-        for(int i=0;i<num;i++){
-            chosen[i] = (int) (Math.random() * hand.size())-1;
+        int[] chosen = new int[20];
+        if (TheRichest.isFirst) {
+            chosen[0] = (int) (Math.random() * hand.size());
+        } else {
+            int num = TheRichest.numOfCards;
+            chosen = new int[num];
+            for (int i = 0; i < num; i++) {
+                chosen[i] = (int) (Math.random() * hand.size());
+            }
         }
         return chosen;
     }
-        
+
 }

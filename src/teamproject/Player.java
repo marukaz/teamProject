@@ -18,6 +18,7 @@ abstract class Player {
     
     public void drawCard(Card card){
         hand.add(card);
+        
     }
     
     public List<Card> leaveCard(int[] arrayNumber){

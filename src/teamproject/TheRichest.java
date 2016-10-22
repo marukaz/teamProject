@@ -11,7 +11,9 @@ import java.util.*;
 /**
  *
  * @author matsumaru
+ * 
  */
+@SuppressWarnings("Convert2Diamond")
 public class TheRichest {
 
     private static Deck deck;
@@ -19,12 +21,13 @@ public class TheRichest {
     private static Field field;
 
     static int passCount = 0;
-    static int joker = 0;
+    static final int JOKER = 1;
     static int turn = 0;
     static int numOfCards = 0;
     static int playerCount = 0;
     static Suit[] bindSuits = new Suit[4];
 
+    static boolean isFirst = true;
     static boolean isBind = false;
     static boolean isSequance = false;
     static boolean isGameRev = false;
@@ -42,7 +45,7 @@ public class TheRichest {
 
         players = new Player[playerCount];
         for (int i = 0; i < playerCount; i++) {
-            players[i] = new RealPlayer();
+            players[i] = new AIsample();
         }
 
         //AIの読み込みは今のところここに実行前に書いておくようにしてください(´・ω・｀)
@@ -56,15 +59,30 @@ public class TheRichest {
                 }
             }
         }
+
+        for (Player p : players) {
+            p.handCards().sort(new Comparator<Card>() {
+                @Override
+                public int compare(Card a, Card b) {
+                    return cardP(a) - cardP(b);
+                }
+            });
+        }
     }
 
     private static void printCards(List<Card> cards) {
+        int i = 1;
         for (Card card : cards) {
+
             if (card.getSuit() == Suit.JOKER) {
-                System.out.print("JOKER ");
+                System.out.print("JK ");
             } else {
                 System.out.print(card.getSuit().getSuitMark() + card.getNum() + " ");
             }
+            if (i % 5 == 0) {
+                System.out.print("* ");
+            }
+            i++;
         }
         System.out.println();
     }
@@ -170,16 +188,9 @@ public class TheRichest {
         return 16;
     }
 
-    public static boolean cardP_Checker(Card card) {
+    private static boolean cardP_Checker(Card card) {
         if (numOfCards == 1 && card.getSuit() == Suit.JOKER) {
             return true;
-        }
-        if (isAllJoker(field.getLastCard(numOfCards))) {
-            if (numOfCards == 1 && card.getSuit() == Suit.SPADE && card.getNum() == 3) {
-                s3check = true;
-                return true;
-            }
-            return false;
         }
         if (isGameRev ^ is11Rev) {
             return cardP(card) < cardP(field.getLastCard());
@@ -188,7 +199,7 @@ public class TheRichest {
         }
     }
 
-    public static boolean isAllJoker(List<Card> cards) {
+    private static boolean isAllJoker(List<Card> cards) {
         for (Card c : cards) {
             if (c.getSuit() != Suit.JOKER) {
                 return false;
@@ -201,8 +212,7 @@ public class TheRichest {
         int num = field.getLastCard().getNum();
         switch (num) {
             case 8:
-                field.clear();
-                is11Rev = false;
+                clearField();
                 System.out.println("\'Eight Cut\'\n");
                 System.out.println("now the field consists of\n");
                 turn--;
@@ -213,30 +223,59 @@ public class TheRichest {
         }
     }
 
+    private static boolean s3checker(Card card) {
+        if (field.getLastCard().getSuit() != Suit.JOKER) {
+            return false;
+        }
+        return card.getNum() == 3 && card.getSuit() == Suit.SPADE;
+    }
+
+    public static List<Card[]> playableCalc(List<Card> hand) {
+        List<Card[]> pacards = new ArrayList<Card[]>();
+        if (isFirst) {
+            for (int i=0; i<hand.size();i++) {
+                Card[] single = {hand.get(i)};
+                pacards.add(single);
+            }
+            pacards.addAll(Calc.multi(hand));
+        } else if (numOfCards == 1) {
+            for(int i=0; i<hand.size();i++){
+                if(cardP(hand.get(i))>cardP(field.getLastCard())){
+                    
+                }
+            }
+        }
+        return pacards;
+    }
+
+    private static void clearField() {
+        field.clear();
+
+        isBind = false;
+        is11Rev = false;
+        isSequance = false;
+        isFirst = true;
+    }
+
     public static void main(String args[]) {
 
         System.out.println("input the number of players");
         try {
-
             playerCount = Integer.parseInt(br.readLine());
-            System.out.println("input the number of jokers");
-            joker = Integer.parseInt(br.readLine());
-
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        gameStart(playerCount, joker);
+        gameStart(playerCount, JOKER);
         System.out.println("\n***Game Start***\n");
         System.out.println("note : input 0 if you pass the turn.\n\n");
 
         while (true) {
 
-            boolean isFirst = field.cards().isEmpty();
             int tPlayerNum = turn % playerCount;
             Player tPlayer = players[tPlayerNum];
 
-            System.out.println("turn of Player" + (tPlayerNum + 1));
+            System.out.println("Turn of Player" + (tPlayerNum + 1));
             printCards(tPlayer.handCards());
             System.out.println("input the number you want to put counting from the left of your hand.");
             // numsにはプログラムとして処理しやすいよう入力-1の値を入れる
@@ -259,17 +298,21 @@ public class TheRichest {
                         passCount++;
                         break;
                     }
-                    passCount = 0;
+
                     List<Card> play = tPlayer.seeCard(nums);
                     if (isFirst) {
                         numOfCards = nums.length;
                         isSequance = checkSQ(play);
-                    } else if (!isBind) {
-                        isBind = checkBind(play);
                     }
 
                     if (numOfCards != 1) {
                         changeJKR(play);
+                    }
+                    if (numOfCards == 1 && !isFirst) {
+                        s3check = s3checker(tPlayer.seeCard(nums[0]));
+                        if (s3check) {
+                            break;
+                        }
                     }
 
                     if (isSequance) {
@@ -280,15 +323,20 @@ public class TheRichest {
                         } else {
                             break;
                         }
-                    } else if (isBind && !checkBind(play)) {
-                        System.out.println("The field is binded.");
-                    } else if (nums.length != numOfCards) {
-                        System.out.println("you must put the same card count of the first put cards.");
                     } else if (!isFirst && !cardP_Checker(play.get(0))) {
                         System.out.println("you must put the stronger card than last put card.");
-                    } else if (!isCardSame(tPlayer, nums)) {
+                    } else if (nums.length != numOfCards) {
+                        System.out.println("you must put the same card count of the first put cards.");
+                    } else if (!isFirst && !isCardSame(tPlayer, nums)) {
                         System.out.println("you must put the same number or JOKER cards.");
+                    } else if (isBind && !checkBind(play)) {
+                        System.out.println("The field is binded.");
                     } else {
+                        passCount = 0;
+                        if (!isFirst && !isBind) {
+                            isBind = checkBind(play);
+                        }
+                        isFirst = false;
                         break;
                     }
                 } catch (IOException e) {
@@ -302,6 +350,7 @@ public class TheRichest {
                     System.out.println("\n\'Revolution\'\n");
                 }
             }
+
             if (tPlayer.handCards().isEmpty()) {
                 System.out.println("The Player wins.");
             }
@@ -313,17 +362,16 @@ public class TheRichest {
             efChecker();
             if (s3check) {
                 System.out.println("\n\'Spade Three Counter\'\n");
-                field.clear();
+                clearField();
                 s3check = false;
                 turn--;
             }
+
             turn++;
+
             if (passCount == players.length - 1) {
                 System.out.println("***All players passed, so the field has reseted.***\n");
-                field.clear();
-                isBind = false;
-                is11Rev = false;
-                isSequance = false;
+                clearField();
             }
 
         }
