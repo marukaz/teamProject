@@ -13,7 +13,6 @@ import java.util.*;
  * @author matsumaru
  * 
  */
-@SuppressWarnings("Convert2Diamond")
 public class TheRichest {
 
     private static Deck deck;
@@ -25,6 +24,7 @@ public class TheRichest {
     static int turn = 0;
     static int numOfCards = 0;
     static int playerCount = 0;
+    static int ranking = 1;
     static Suit[] bindSuits = new Suit[4];
 
     static boolean isFirst = true;
@@ -46,6 +46,7 @@ public class TheRichest {
         players = new Player[playerCount];
         for (int i = 0; i < playerCount; i++) {
             players[i] = new AIsample();
+            players[i].giveNumber(i+1);
         }
 
         //AIの読み込みは今のところここに実行前に書いておくようにしてください(´・ω・｀)
@@ -59,7 +60,7 @@ public class TheRichest {
                 }
             }
         }
-
+        // 手札のソート
         for (Player p : players) {
             p.handCards().sort(new Comparator<Card>() {
                 @Override
@@ -78,9 +79,6 @@ public class TheRichest {
                 System.out.print("JK ");
             } else {
                 System.out.print(card.getSuit().getSuitMark() + card.getNum() + " ");
-            }
-            if (i % 5 == 0) {
-                System.out.print("* ");
             }
             i++;
         }
@@ -229,24 +227,24 @@ public class TheRichest {
         }
         return card.getNum() == 3 && card.getSuit() == Suit.SPADE;
     }
-
-    public static List<Card[]> playableCalc(List<Card> hand) {
-        List<Card[]> pacards = new ArrayList<Card[]>();
-        if (isFirst) {
-            for (int i=0; i<hand.size();i++) {
-                Card[] single = {hand.get(i)};
-                pacards.add(single);
-            }
-            pacards.addAll(Calc.multi(hand));
-        } else if (numOfCards == 1) {
-            for(int i=0; i<hand.size();i++){
-                if(cardP(hand.get(i))>cardP(field.getLastCard())){
-                    
-                }
-            }
-        }
-        return pacards;
-    }
+//
+//    public static List<Card[]> playableCalc(List<Card> hand) {
+//        List<Card[]> pacards = new ArrayList<Card[]>();
+//        if (isFirst) {
+//            for (int i=0; i<hand.size();i++) {
+//                Card[] single = {hand.get(i)};
+//                pacards.add(single);
+//            }
+//            pacards.addAll(Calc.multi(hand));
+//        } else if (numOfCards == 1) {
+//            for(int i=0; i<hand.size();i++){
+//                if(cardP(hand.get(i))>cardP(field.getLastCard())){
+//                    
+//                }
+//            }
+//        }
+//        return pacards;
+//    }
 
     private static void clearField() {
         field.clear();
@@ -275,7 +273,7 @@ public class TheRichest {
             int tPlayerNum = turn % playerCount;
             Player tPlayer = players[tPlayerNum];
 
-            System.out.println("Turn of Player" + (tPlayerNum + 1));
+            System.out.println("Turn of Player" + (tPlayer.playerNum()));
             printCards(tPlayer.handCards());
             System.out.println("input the number you want to put counting from the left of your hand.");
             // numsにはプログラムとして処理しやすいよう入力-1の値を入れる
@@ -353,6 +351,23 @@ public class TheRichest {
 
             if (tPlayer.handCards().isEmpty()) {
                 System.out.println("The Player wins.");
+                tPlayer.giveRank(ranking);
+                ranking++;
+                Player[] restPlayers = new Player[players.length-1];
+                int r = 0;
+                for(int i=0;i<players.length;i++){
+                    if(i != tPlayerNum){
+                        restPlayers[r] = players[i];
+                        r++;
+                    }
+                }
+                players = restPlayers;
+                turn = tPlayerNum;
+                playerCount--;
+              if(playerCount ==1){
+                    System.out.println("\n *** Game Set ***\n");
+                    break;
+              }
             }
 
             System.out.println("OK, now the field consists of");

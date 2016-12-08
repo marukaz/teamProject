@@ -11,9 +11,12 @@ import java.util.*;
  */
 abstract class Player {
     public List<Card> hand;
+    private int playerNumber;
+    private int rank;
     
     public Player(){
         this.hand = new ArrayList<Card>();
+        this.rank = 0;
     }
     
     public void drawCard(Card card){
@@ -48,6 +51,22 @@ abstract class Player {
     
     public List<Card> handCards(){
         return hand;
+    }
+    
+    public int playerNum(){
+        return playerNumber;
+    }
+    
+    public void giveNumber(int num){
+        playerNumber = num;
+    }
+    
+    public int playerRank(){
+        return rank;
+    }
+    
+    public void giveRank(int num){
+        rank = num;
     }
     
     abstract int[] chooseCard();
