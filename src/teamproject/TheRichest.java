@@ -11,7 +11,7 @@ import java.util.*;
 /**
  *
  * @author matsumaru
- * 
+ *
  */
 public class TheRichest {
 
@@ -46,7 +46,7 @@ public class TheRichest {
         players = new Player[playerCount];
         for (int i = 0; i < playerCount; i++) {
             players[i] = new AIsample();
-            players[i].giveNumber(i+1);
+            players[i].giveNumber(i + 1);
         }
 
         //AIの読み込みは今のところここに実行前に書いておくようにしてください(´・ω・｀)
@@ -62,7 +62,7 @@ public class TheRichest {
         }
         // 手札のソート
         for (Player p : players) {
-            p.handCards().sort(new Comparator<Card>() {
+            Collections.sort(p.handCards(), new Comparator<Card>() {
                 @Override
                 public int compare(Card a, Card b) {
                     return cardP(a) - cardP(b);
@@ -72,7 +72,6 @@ public class TheRichest {
     }
 
     private static void printCards(List<Card> cards) {
-        int i = 1;
         for (Card card : cards) {
 
             if (card.getSuit() == Suit.JOKER) {
@@ -80,7 +79,6 @@ public class TheRichest {
             } else {
                 System.out.print(card.getSuit().getSuitMark() + card.getNum() + " ");
             }
-            i++;
         }
         System.out.println();
     }
@@ -197,15 +195,6 @@ public class TheRichest {
         }
     }
 
-    private static boolean isAllJoker(List<Card> cards) {
-        for (Card c : cards) {
-            if (c.getSuit() != Suit.JOKER) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     private static void efChecker() {
         int num = field.getLastCard().getNum();
         switch (num) {
@@ -227,24 +216,61 @@ public class TheRichest {
         }
         return card.getNum() == 3 && card.getSuit() == Suit.SPADE;
     }
-//
-//    public static List<Card[]> playableCalc(List<Card> hand) {
-//        List<Card[]> pacards = new ArrayList<Card[]>();
-//        if (isFirst) {
-//            for (int i=0; i<hand.size();i++) {
-//                Card[] single = {hand.get(i)};
-//                pacards.add(single);
-//            }
-//            pacards.addAll(Calc.multi(hand));
-//        } else if (numOfCards == 1) {
-//            for(int i=0; i<hand.size();i++){
-//                if(cardP(hand.get(i))>cardP(field.getLastCard())){
-//                    
-//                }
-//            }
-//        }
-//        return pacards;
-//    }
+
+    public static List<List<Card>> playableCalc(List<Card> hand) {
+        List<List<Card>> pacards = new ArrayList<List<Card>>();
+        List<Card> single = new ArrayList<Card>(1);
+        if (isFirst) {
+            pacards.addAll(Calc.single(hand));
+            pacards.addAll(Calc.multi(hand));
+            pacards.addAll(Calc.triple(hand));
+            pacards.addAll(Calc.quartet(hand));
+        } else {
+            List<Card> subHand;
+            switch (numOfCards) {
+                case 1:
+                    if (field.getLastCard().getSuit() == Suit.JOKER) {
+                        Card spade3 = new Card(Suit.SPADE, 3);
+                        if (hand.contains(spade3)) {
+                            single.add(spade3);
+                            pacards.add(single);
+                        }
+                    } else {
+                        for (int i = 0; i < hand.size(); i++) {
+                            if (cardP(hand.get(i)) > cardP(field.getLastCard())) {
+                                subHand = hand.subList(i, hand.size());
+                                if (isBind) {
+                       //             pacards.addAll(Calc.matchSuit(subHand, field.getLastCard().getSuit()));
+                                } else {
+                                    pacards.addAll(Calc.single(subHand));
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    break;
+
+                case 2:
+                    for (int i = 0; i < hand.size(); i++) {
+                        if (cardP(hand.get(i)) > cardP(field.getLastCard())) {
+                            subHand = hand.subList(i, hand.size());
+                            if (isBind) {
+                                pacards.addAll(Calc.multi(subHand, field.getCard(0).getSuit(), field.getCard(1).getSuit()));
+                            } else {
+                                pacards.addAll(Calc.multi(subHand));
+                            }
+                            break;
+                        }
+                    }
+
+                    break;
+
+                case 3:
+
+            }
+        }
+        return pacards;
+    }
 
     private static void clearField() {
         field.clear();
@@ -256,7 +282,13 @@ public class TheRichest {
     }
 
     public static void main(String args[]) {
-
+        List<Card> tests = new ArrayList<>();
+        tests.add(new Card(Suit.CLUB,1));
+        tests.add(new Card(Suit.JOKER,3));
+        tests.add(new Card(Suit.HEART,99));
+ 
+        System.out.println(Calc.matchSuit(tests, Suit.DIAMOND,Suit.HEART, Suit.CLUB));
+        System.out.println(tests.get(1).getNum());
         System.out.println("input the number of players");
         try {
             playerCount = Integer.parseInt(br.readLine());
@@ -341,6 +373,8 @@ public class TheRichest {
                     e.printStackTrace();
                 }
             }
+
+            //カードを出す
             if (passCount == 0) {
                 field.addCard(tPlayer.leaveCard(nums));
                 if (numOfCards >= 4) {
@@ -353,10 +387,10 @@ public class TheRichest {
                 System.out.println("The Player wins.");
                 tPlayer.giveRank(ranking);
                 ranking++;
-                Player[] restPlayers = new Player[players.length-1];
+                Player[] restPlayers = new Player[players.length - 1];
                 int r = 0;
-                for(int i=0;i<players.length;i++){
-                    if(i != tPlayerNum){
+                for (int i = 0; i < players.length; i++) {
+                    if (i != tPlayerNum) {
                         restPlayers[r] = players[i];
                         r++;
                     }
@@ -364,10 +398,10 @@ public class TheRichest {
                 players = restPlayers;
                 turn = tPlayerNum;
                 playerCount--;
-              if(playerCount ==1){
+                if (playerCount == 1) {
                     System.out.println("\n *** Game Set ***\n");
                     break;
-              }
+                }
             }
 
             System.out.println("OK, now the field consists of");

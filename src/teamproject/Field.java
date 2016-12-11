@@ -24,6 +24,11 @@ public class Field {
         return cards;
     }
     
+    public Card getCard(int num){
+        return cards.get(cards.size() - 1 - num);
+    }
+        
+ 
     public Card getLastCard(){
         return cards.get(cards.size()-1);
     }
