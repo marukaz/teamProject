@@ -282,6 +282,16 @@ public class TheRichest {
     }
 
     public static void main(String args[]) {
+        List<Card> test = new ArrayList<>();
+        test.add(new Card(Suit.CLUB,6));
+        test.add(new Card(Suit.HEART,6));
+        test.add(new Card(Suit.SPADE,6));
+        test.add(new Card(Suit.DIAMOND,6));
+   
+        List<List<Card>> tests = playableCalc(test);
+        for(List<Card> cs : tests){
+            printCards(cs);
+        }
         System.out.println("input the number of players");
         try {
             playerCount = Integer.parseInt(br.readLine());
