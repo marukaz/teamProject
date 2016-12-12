@@ -5,31 +5,57 @@
  */
 package teamproject;
 
+import java.util.Objects;
+
 /**
  *
  * @author matsumaru
  */
 public class Card {
-    
-    
+
     public static final int SUITKIND = 4;
     public static final int NUMBERKIND = 13;
-    
+
     private Suit suit;
     protected int number;
-    
-    public Card(Suit suit, int number){
+
+    public Card(Suit suit, int number) {
         this.suit = suit;
         this.number = number;
     }
-    
-    public Suit getSuit(){
+
+    public Suit getSuit() {
         return suit;
     }
-    
-    public int getNum(){
+
+    public int getNum() {
         return number;
     }
-    
-    
+
+    @Override
+    public boolean equals(Object obj) {
+
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        Card c = (Card) obj;
+        Suit s = c.suit;
+        int n = c.number;
+
+        return suit == s && number == n;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 29 * hash + Objects.hashCode(this.suit);
+        hash = 29 * hash + this.number;
+        return hash;
+    }
 }

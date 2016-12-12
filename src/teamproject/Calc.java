@@ -14,8 +14,6 @@ import java.util.*;
  */
 public class Calc {
 
-
-
 //    static boolean matchSuit(List<Card> cards, Suit... suits) {
 //        matchFlag = false;
 //        List<Card> newCards = new ArrayList<Card>();
@@ -48,7 +46,7 @@ public class Calc {
                     break;
                 }
             }
-            if(!flag && c.getSuit() != Suit.JOKER){
+            if (!flag && c.getSuit() != Suit.JOKER) {
                 return false;
             }
             flag = false;
@@ -84,6 +82,7 @@ public class Calc {
     static List<List<Card>> multi(List<Card> cards) {
         List<List<Card>> rCards = new ArrayList<List<Card>>();
         List<Card> multi = new ArrayList<Card>(3);
+        if(cards.size() == 1) return rCards;
         int k = 1;
         for (Card c : cards) {
             for (int i = k; i < cards.size(); i++) {
@@ -111,7 +110,7 @@ public class Calc {
         return rCards;
     }
 
-    static List<List<Card>> multi(List<Card> cards, Suit suit1, Suit suit2) {
+    static List<List<Card>> multi(List<Card> cards, Suit[] suits) {
         List<List<Card>> rCards = new ArrayList<List<Card>>();
         List<Card> multi = new ArrayList<Card>(3);
         int k = 1;
@@ -119,7 +118,7 @@ public class Calc {
             for (int i = k; i < cards.size(); i++) {
                 Card next = cards.get(i);
                 if (c.getNum() == next.getNum()) {
-                    if ((c.getSuit() == suit1 && next.getSuit() == suit2) || (c.getSuit() == suit2 && next.getSuit() == suit1)) {
+                    if ((c.getSuit() == suits[0] && next.getSuit() == suits[1]) || (c.getSuit() == suits[1] && next.getSuit() == suits[0])) {
                         multi.add(c);
                         multi.add(cards.get(i));
                         rCards.add(multi);
@@ -135,7 +134,7 @@ public class Calc {
         Card wonderJK = cards.get(cards.size() - 1);
         if (wonderJK.getSuit() == Suit.JOKER) {
             for (Card c : cards) {
-                if (c.getSuit() == suit1 || c.getSuit() == suit2) {
+                if (c.getSuit() == suits[0] || c.getSuit() == suits[1]) {
                     multi.add(c);
                     multi.add(wonderJK);
                     rCards.add(multi);
@@ -184,6 +183,17 @@ public class Calc {
         return rCards;
     }
 
+    static List<List<Card>> triple(List<Card> cards, Suit... suits) {
+        List<List<Card>> rCards = new ArrayList<List<Card>>();
+        List<List<Card>> cardses = triple(cards);
+        for (List<Card> cs : cardses) {
+            if (matchSuit(cs, suits)) {
+                rCards.add(cs);
+            }
+        }
+        return rCards;
+    }
+
     static List<List<Card>> quartet(List<Card> cards) {
         List<List<Card>> rCards = new ArrayList<List<Card>>();
         List<Card> quartet = new ArrayList<Card>(5);
@@ -224,6 +234,17 @@ public class Calc {
                 tripleCard.add(wonderJK);
                 rCards.add(tripleCard);
                 tripleCard.clear();
+            }
+        }
+        return rCards;
+    }
+
+    static List<List<Card>> quartet(List<Card> cards, Suit... suits) {
+        List<List<Card>> rCards = new ArrayList<List<Card>>();
+        List<List<Card>> cardses = quartet(cards);
+        for (List<Card> cs : cardses) {
+            if (matchSuit(cs, suits)) {
+                rCards.add(cs);
             }
         }
         return rCards;

@@ -21,10 +21,10 @@ public class AIsample extends Player {
             int num = TheRichest.numOfCards;
             chosen = new int[num];
             for (int i = 0; i < num; i++) {
-                chosen[i] = -1 + (int) (Math.random() * (hand.size()+1) );
+                chosen[i] = -1 + (int) (Math.random() * (hand.size() + 1));
             }
         }
-        
+
         return chosen;
     }
 

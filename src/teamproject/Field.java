@@ -28,7 +28,16 @@ public class Field {
         return cards.get(cards.size() - 1 - num);
     }
         
- 
+    public Suit[] getSuits(int num){
+        List<Card> cards = getLastCard(num);
+        Suit[] suits = new Suit[num];
+        for(int i=0; i<num; i++){
+            suits[i] = cards.get(i).getSuit();
+        }
+        return suits;
+    }
+    
+    
     public Card getLastCard(){
         return cards.get(cards.size()-1);
     }
