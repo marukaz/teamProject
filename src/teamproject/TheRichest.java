@@ -45,7 +45,7 @@ public class TheRichest {
 
         players = new Player[playerCount];
         for (int i = 0; i < playerCount; i++) {
-            players[i] = new AIsample();
+            players[i] = new MonteCarloAI();
             players[i].giveNumber(i + 1);
         }
 
@@ -65,40 +65,38 @@ public class TheRichest {
             Collections.sort(p.handCards(), new Comparator<Card>() {
                 @Override
                 public int compare(Card a, Card b) {
-                    return cardP(a) - cardP(b);
+                    return a.getPow() - b.getPow();
                 }
             });
         }
     }
 
     private static void printCards(List<Card> cards) {
-        for (Card card : cards) {
-
-            if (card.getSuit() == Suit.JOKER) {
+        for (Card c : cards) {
+            if (c.getSuit() == Suit.JOKER) {
                 System.out.print("JK ");
             } else {
-                System.out.print(card.getSuit().getSuitMark() + card.getNum() + " ");
+                System.out.print(c.getSuit().getSuitMark() + c.getNum() + " ");
             }
         }
         System.out.println();
     }
 
     private static void changeJKR(List<Card> cards) {
-
-        int cardNum = 0;
+        int cardPow = 0;
 
         if (isSequance) {
             int position = 0;
             for (Card c : cards) {
                 if (c.getSuit() != Suit.JOKER) {
-                    cardNum = c.getNum();
+                    cardPow = c.getPow();
                     position = cards.indexOf(c);
                     break;
                 }
             }
             for (int i = 0; i < cards.size(); i++) {
                 if (cards.get(i).getSuit() == Suit.JOKER) {
-                    cards.get(i).number = cardNum + i - position;
+                    cards.get(i).changePow(cardPow + i - position);
 
                 }
             }
@@ -106,13 +104,13 @@ public class TheRichest {
         } else {
             for (Card c : cards) {
                 if (c.getSuit() != Suit.JOKER) {
-                    cardNum = c.getNum();
+                    cardPow = c.getPow();
                     break;
                 }
             }
             for (Card c : cards) {
                 if (c.getSuit() == Suit.JOKER) {
-                    c.number = cardNum;
+                    c.changePow(cardPow);
                 }
             }
         }
@@ -159,39 +157,39 @@ public class TheRichest {
         Card card = cards.get(0);
         for (int i = 1; i < cards.size(); i++) {
             Card nowc = cards.get(i);
-            if (nowc.getSuit() != Suit.JOKER && card.getSuit() != Suit.JOKER) {
+            if (nowc.getSuit() == Suit.JOKER) {
+                if (((card.getPow() + 2 != cards.get(i+1).getPow()) || card.getSuit() != cards.get(i+1).getSuit())&& (i != cards.size() - 1)) {
+                    return false;
+                }
+            } else if (card.getSuit() == Suit.JOKER) {
+
+            } else {
                 if (card.getSuit() != nowc.getSuit()) {
                     return false;
                 }
-                if (card.getNum() + 1 != nowc.getNum()) {
+                if (card.getPow() + 1 != nowc.getPow()) {
                     return false;
                 }
             }
             card = nowc;
         }
-        return true;
-    }
 
-    private static int cardP(Card card) {
-        int num = card.getNum();
-        if (num > 2) {
-            return num;
-        } else if (num == 1) {
-            return 14;
-        } else if (num == 2) {
-            return 15;
-        }
-        return 16;
+        return true;
     }
 
     private static boolean cardP_Checker(Card card) {
         if (numOfCards == 1 && card.getSuit() == Suit.JOKER) {
             return true;
         }
+
+        if (numOfCards == 1 && field.getLastCard().getSuit() == Suit.JOKER) {
+            return false;
+        }
+
         if (isGameRev ^ is11Rev) {
-            return cardP(card) < cardP(field.getLastCard());
+            return card.getPow() < field.getLastCard().getPow();
         } else {
-            return cardP(card) > cardP(field.getLastCard());
+            return card.getPow() > field.getLastCard().getPow();
         }
     }
 
@@ -225,6 +223,8 @@ public class TheRichest {
             pacards.addAll(Calc.multi(hand));
             pacards.addAll(Calc.triple(hand));
             pacards.addAll(Calc.quartet(hand));
+            pacards.addAll(Calc.sequance3(hand));
+            pacards.addAll(Calc.sequance4(hand));
         } else {
             List<Card> subHand = new ArrayList<Card>(hand.size());
             for (Card c : hand) {
@@ -258,6 +258,8 @@ public class TheRichest {
                 case 3:
                     if (isBind) {
                         pacards.addAll(Calc.triple(subHand, field.getSuits(3)));
+                    } else if (isSequance) {
+                        pacards.addAll(Calc.sequance3(subHand));
                     } else {
                         pacards.addAll(Calc.triple(subHand));
                     }
@@ -265,6 +267,8 @@ public class TheRichest {
                 case 4:
                     if (isBind) {
                         pacards.addAll(Calc.multi(subHand, field.getSuits(4)));
+                    } else if (isSequance) {
+                        pacards.addAll(Calc.sequance4(subHand));
                     } else {
                         pacards.addAll(Calc.quartet(subHand));
                     }
@@ -275,6 +279,7 @@ public class TheRichest {
     }
 
     private static void clearField() {
+        field.clear();
         isBind = false;
         is11Rev = false;
         isSequance = false;
@@ -282,16 +287,6 @@ public class TheRichest {
     }
 
     public static void main(String args[]) {
-        List<Card> test = new ArrayList<>();
-        test.add(new Card(Suit.CLUB,6));
-        test.add(new Card(Suit.HEART,6));
-        test.add(new Card(Suit.SPADE,6));
-        test.add(new Card(Suit.DIAMOND,6));
-   
-        List<List<Card>> tests = playableCalc(test);
-        for(List<Card> cs : tests){
-            printCards(cs);
-        }
         System.out.println("input the number of players");
         try {
             playerCount = Integer.parseInt(br.readLine());
@@ -336,6 +331,7 @@ public class TheRichest {
                     if (isFirst) {
                         numOfCards = nums.length;
                         isSequance = checkSQ(play);
+                        printCards(play);
                     }
 
                     if (numOfCards != 1) {
@@ -356,13 +352,14 @@ public class TheRichest {
                             System.out.println("you must put the stronger card than last put card.");
                         } else {
                             passCount = 0;
+                            isFirst = false;
                             break;
                         }
                     } else if (!isFirst && !cardP_Checker(play.get(0))) {
                         System.out.println("you must put the stronger card than last put card.");
                     } else if (nums.length != numOfCards) {
                         System.out.println("you must put the same card count of the first put cards.");
-                    } else if (!isFirst && !isCardSame(tPlayer, nums)) {
+                    } else if (!isCardSame(tPlayer, nums)) {
                         System.out.println("you must put the same number or JOKER cards.");
                     } else if (isBind && !checkBind(play)) {
                         System.out.println("The field is binded.");
@@ -410,7 +407,7 @@ public class TheRichest {
             }
 
             System.out.println("OK, now the field consists of");
-            printCards(field.cards());
+            printCards(field.nowCards());
             System.out.println();
 
             efChecker();

@@ -18,10 +18,18 @@ public class Card {
 
     private Suit suit;
     protected int number;
-
+    private int power;
+    
     public Card(Suit suit, int number) {
         this.suit = suit;
         this.number = number;
+        this.power = number;
+    }
+    
+    public Card(Suit suit, int number, int power) {
+        this.suit = suit;
+        this.number = number;
+        this.power = power;
     }
 
     public Suit getSuit() {
@@ -32,6 +40,14 @@ public class Card {
         return number;
     }
 
+    public int getPow(){
+        return power;
+    }
+    
+    public void changePow(int pow){
+        power = pow;
+    }
+    
     @Override
     public boolean equals(Object obj) {
 
