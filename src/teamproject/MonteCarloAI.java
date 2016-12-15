@@ -21,18 +21,18 @@ public class MonteCarloAI extends Player {
         List<List<Card>> playableCards = game.playableCalc(hand);
         int rankSumMin = 10000;
         int[] chosen = {-1};
-        
+
         if (playableCards.isEmpty() || playableCards.get(0).isEmpty()) {
             return chosen;
         }
-        
+
         for (int i = 0; i < playableCards.size(); i++) {
             try {
                 List<Card> cards = playableCards.get(i);
                 int rankSum = 0;
                 int size = cards.size();
                 int[] nums = new int[size];
-                
+
                 for (int k = 0; k < size; k++) {
                     nums[k] = hand.indexOf(cards.get(k));
                 }
@@ -51,13 +51,12 @@ public class MonteCarloAI extends Player {
 
         //パスについてのプレイアウト
         if (!game.isFirst) {
-            
             try {
-                PlayRichest copyGame = game.clone();
                 int[] nums = {-1};
                 int rankSum = 0;
-                
+
                 for (int k = 0; k < PLAYOUTTIMES; k++) {
+                    PlayRichest copyGame = game.clone();
                     rankSum += copyGame.playOut(nums);
                 }
                 if (rankSum < rankSumMin) {

@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,6 +20,7 @@ public class PlayRichest implements Cloneable {
 
     private Deck deck;
     private Player[] players;
+    private HashMap<Integer, String> rankMap;
     private Field field;
 
     int passCount = 0;
@@ -27,7 +29,7 @@ public class PlayRichest implements Cloneable {
     int playerCount = 0;
     int turnPlayerNum = 0;
     int numOfCards = 0;
-    int ranking = 0;
+    int ranking = 1;
     Suit[] bindSuits = new Suit[4];
 
     boolean isFirst = true;
@@ -39,12 +41,14 @@ public class PlayRichest implements Cloneable {
 
     private BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-    private void gameStart(int playerCount, int joker) {
-
-        deck = new Deck(joker);
+    public PlayRichest() {
+        deck = new Deck(JOKER);
         deck.deckMake();
         field = new Field();
+        this.rankMap = new HashMap<Integer, String>();
+    }
 
+    private void gameStart(int playerCount) {
         players = new Player[playerCount];
         for (int i = 0; i < playerCount; i++) {
             players[i] = new RandomAI();
@@ -120,10 +124,16 @@ public class PlayRichest implements Cloneable {
         }
     }
 
-    private boolean isCardSame(Player player, int[] arrayNum) {
-        int cNum = player.seeCard(arrayNum[0]).getNum();
-        for (int i = 1; i < arrayNum.length; i++) {
-            if (player.seeCard(arrayNum[i]).getNum() != cNum) {
+    private boolean isCardsSameNum(List<Card> cards) {
+        int num = -1;
+        for (Card c : cards) {
+            if (c.getSuit() != Suit.JOKER) {
+                num = c.getNum();
+                break;
+            }
+        }
+        for (Card c : cards) {
+            if (c.getNum() != num && c.getSuit() != Suit.JOKER) {
                 return false;
             }
         }
@@ -378,7 +388,7 @@ public class PlayRichest implements Cloneable {
                     }
                 } else if (!isFirst && !cardP_Checker(play.get(0))) {
                 } else if (nums.length != numOfCards) {
-                } else if (!isCardSame(turnPlayer, nums)) {
+                } else if (!isCardsSameNum(play)) {
                 } else if (isBind && !checkBind(play)) {
                 } else {
                     passCount = 0;
@@ -411,7 +421,7 @@ public class PlayRichest implements Cloneable {
                     }
                 }
                 players = restPlayers;
-                turn = turnPlayerNum-1;
+                turn = turnPlayerNum;
                 playerCount--;
                 if (players.length == 1) {
                     return ranking;
@@ -445,7 +455,7 @@ public class PlayRichest implements Cloneable {
             e.printStackTrace();
         }
 
-        gameStart(playerCount, JOKER);
+        gameStart(playerCount);
         System.out.println("\n***Game Start***\n");
         System.out.println("note : input 0 if you pass the turn.\n\n");
 
@@ -516,7 +526,7 @@ public class PlayRichest implements Cloneable {
                         System.out.println("you must put the stronger card than last put card.");
                     } else if (nums.length != numOfCards) {
                         System.out.println("you must put the same card count of the first put cards.");
-                    } else if (!isCardSame(turnPlayer, nums)) {
+                    } else if (!isCardsSameNum(play)) {
                         System.out.println("you must put the same number or JOKER cards.");
                     } else if (isBind && !checkBind(play)) {
                         System.out.println("The field is binded.");
@@ -542,23 +552,35 @@ public class PlayRichest implements Cloneable {
                 }
             }
 
+            //プレイヤーがあがった時の処理
             if (turnPlayer.handCards().isEmpty()) {
                 System.out.println("The Player wins.");
                 turnPlayer.giveRank(ranking);
+                rankMap.put(ranking, "Player" + turnPlayer.playerNum());
+                System.out.println("rank ------------------------------------------" + ranking);
                 ranking++;
-                Player[] resturnPlayers = new Player[players.length - 1];
+                Player[] restPlayers = new Player[players.length - 1];
                 int r = 0;
                 for (int i = 0; i < players.length; i++) {
                     if (i != turnPlayerNum) {
-                        resturnPlayers[r] = players[i];
+                        restPlayers[r] = players[i];
                         r++;
                     }
                 }
-                players = resturnPlayers;
-                turn = turnPlayerNum-1;
+                players = restPlayers;
+
+                turn = turnPlayerNum - 1;
                 playerCount--;
                 if (playerCount == 1) {
                     System.out.println("\n *** Game Set ***\n");
+                    for (int i = 1; i < rankMap.size()+1; i++) {
+                        String playerName = rankMap.get(i);
+                        System.out.println(playerName + " is rank " + i );
+                    }
+                    System.out.println("Player"+players[0].playerNum()+ " is rank 5");
+                    for (Player p : players) {
+                        System.out.println("");
+                    }
                     break;
                 }
             }
