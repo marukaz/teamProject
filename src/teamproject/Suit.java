@@ -21,10 +21,7 @@ public enum Suit {
 
     Suit(String name) {
         this.name = name;
-    }
-
-    ;
-        
+    }   
         public String getSuitMark() {
         return name;
     }

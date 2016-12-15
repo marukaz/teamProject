@@ -20,6 +20,11 @@ public class Deck {
         this.deck = new ArrayList<Card>();
         this.joker = joker;
     }
+    public Deck(int joker, List<Card> cards) {
+        this.deck = new ArrayList<Card>();
+        deck.addAll(cards);
+        this.joker = joker;
+    }
 
     public void deckMake() {
         for (Suit s : Suit.values()) {

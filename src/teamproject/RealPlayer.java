@@ -9,7 +9,7 @@ package teamproject;
 public class RealPlayer extends Player {
 
     @Override
-    int[] chooseCard() {
+    int[] chooseCard(PlayRichest game) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

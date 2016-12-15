@@ -17,6 +17,12 @@ public class Field {
         this.allCards = new ArrayList<Card>();
         this.nowCards = new ArrayList<Card>();
     }
+    public Field(List<Card> all, List<Card> now){
+        this.allCards = new ArrayList<Card>();
+        allCards.addAll(all);
+        this.nowCards = new ArrayList<Card>();
+        nowCards.addAll(now);
+    }
     
     public void addCard(List<Card> card){
         nowCards.addAll(card);
