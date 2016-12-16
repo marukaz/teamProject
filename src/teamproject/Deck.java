@@ -13,7 +13,7 @@ import java.util.*;
  */
 public class Deck {
 
-    private List<Card> deck;
+     List<Card> deck;
     private int joker;
 
     public Deck(int joker) {
@@ -51,6 +51,14 @@ public class Deck {
 
     public Card dealCard() {
         return deck.remove(0);
+    }
+    
+    public List<Card> dealCard(int num) {
+        List<Card> deals = new ArrayList<Card>();
+        for(int i=0; i<num; i++){
+            deals.add(deck.remove(0));
+        }
+        return deals;
     }
 
     public boolean isEmpty() {

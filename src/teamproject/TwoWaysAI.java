@@ -11,30 +11,34 @@ import java.util.List;
  *
  * @author matsumaru
  */
-public class RandomAI extends Player {
-
-    RandomAI() {
+public class TwoWaysAI extends Player{
+    TwoWaysAI() {
         super();
     }
     
-    RandomAI(List<Card> handCards) {
+    TwoWaysAI(List<Card> handCards) {
         super(handCards);
     }
 
     @Override
     int[] chooseCard(PlayRichest game) {
         List<List<Card>> playableCards = game.playableCalc(hand);
-        int rand = -1 + (int) (Math.random()*(playableCards.size()+1));
+        double rand = Math.random();
         int[] nums = {-1};
-        
         if (playableCards.isEmpty() || playableCards.get(0).isEmpty()) {
             return nums;
         }
-        
-        if (rand == -1) {
+
+        if (!game.isFirst && rand > 0.9) {
             return nums;
-        } else{
-            List<Card> playCards = playableCards.get(rand);
+        } else if (rand > 0.5) {
+            List<Card> playCards = playableCards.get(0);
+            nums = new int[playCards.size()];
+            for (int i = 0; i < playCards.size(); i++) {
+                nums[i] = hand.indexOf(playCards.get(i));
+            }
+        } else {
+            List<Card> playCards = playableCards.get(playableCards.size() - 1);
             nums = new int[playCards.size()];
             for (int i = 0; i < playCards.size(); i++) {
                 nums[i] = hand.indexOf(playCards.get(i));

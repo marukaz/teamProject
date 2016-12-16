@@ -17,7 +17,7 @@ public class MonteCarloAI extends Player {
 
     @Override
     int[] chooseCard(PlayRichest game) {
-        final int PLAYOUTTIMES = 100;
+        final int PLAYOUTTIMES = 500;
         List<List<Card>> playableCards = game.playableCalc(hand);
         int rankSumMin = 10000;
         int[] chosen = {-1};
@@ -31,18 +31,21 @@ public class MonteCarloAI extends Player {
                 List<Card> cards = playableCards.get(i);
                 int rankSum = 0;
                 int size = cards.size();
-                int[] nums = new int[size];
+                if (size > 0) {
+                    int[] nums = new int[size];
 
-                for (int k = 0; k < size; k++) {
-                    nums[k] = hand.indexOf(cards.get(k));
-                }
-                for (int k = 0; k < PLAYOUTTIMES; k++) {
-                    PlayRichest copyGame = game.clone();
-                    rankSum += copyGame.playOut(nums);
-                }
-                if (rankSum < rankSumMin) {
-                    rankSumMin = rankSum;
-                    chosen = nums;
+                    for (int k = 0; k < size; k++) {
+                        nums[k] = hand.indexOf(cards.get(k));
+                    }
+                    for (int k = 0; k < PLAYOUTTIMES; k++) {
+                        PlayRichest copyGame;
+                        copyGame = game.clone();
+                        rankSum += copyGame.playOut(nums);
+                    }
+                    if (rankSum < rankSumMin) {
+                        rankSumMin = rankSum;
+                        chosen = nums;
+                    }
                 }
             } catch (CloneNotSupportedException ex) {
                 Logger.getLogger(MonteCarloAI.class.getName()).log(Level.SEVERE, null, ex);

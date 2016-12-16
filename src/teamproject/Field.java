@@ -24,9 +24,9 @@ public class Field {
         nowCards.addAll(now);
     }
     
-    public void addCard(List<Card> card){
-        nowCards.addAll(card);
-        allCards.addAll(card);
+    public void addCard(List<Card> cards){
+        nowCards.addAll(cards);
+        allCards.addAll(cards);
     }
     
     public List<Card> allTimeCards(){

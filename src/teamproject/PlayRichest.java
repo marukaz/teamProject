@@ -18,15 +18,18 @@ import java.util.logging.Logger;
  */
 public class PlayRichest implements Cloneable {
 
+    // monteは0からはじまるので注意　monte = 0ならばプレイヤー1となる
+    private int monte = 4;
+
     private Deck deck;
-    private Player[] players;
+    public Player[] players;
     private HashMap<Integer, String> rankMap;
     private Field field;
 
     int passCount = 0;
     final int JOKER = 0;
     int turn = 0;
-    int playerCount = 0;
+    int playerCount = 5;
     int turnPlayerNum = 0;
     int numOfCards = 0;
     int ranking = 1;
@@ -51,14 +54,14 @@ public class PlayRichest implements Cloneable {
     private void gameStart(int playerCount) {
         players = new Player[playerCount];
         for (int i = 0; i < playerCount; i++) {
-            players[i] = new RandomAI();
+            players[i] = new RealPlayer();
             players[i].giveNumber(i + 1);
         }
 
         //AIの読み込みは今のところここに実行前に書いておくようにしてください(´・ω・｀)
         // players[2] = new AIsample();
-        players[0] = new MonteCarloAI();
-        players[0].giveNumber(1);
+        players[monte] = new MonteCarloAI();
+        players[monte].giveNumber(monte + 1);
         outside:
         while (true) {
             for (Player p : players) {
@@ -316,23 +319,21 @@ public class PlayRichest implements Cloneable {
             copy.field = new Field(field.allTimeCards(), field.nowCards());
             Deck restCards = new Deck(JOKER);
             restCards.deckMake();
+
             restCards.remove(field.allTimeCards());
             //プレイアウトのためのクローンなのでデッキからターンプレイヤーの手札を除いている
             restCards.remove(players[turnPlayerNum].handCards());
 
-            //プレイアウトのためのクローンなのでプレイヤーを全員RandomAIにしている
+            //プレイアウトのためのクローンなのでプレイヤーを全員RandomAI系にしている
             copy.players = new Player[players.length];
-            copy.players[0] = new RandomAI(players[turnPlayerNum].handCards());
-            copy.players[0].giveNumber(1);
-
-            for (int i = 1; i < players.length; i++) {
-                copy.players[i] = new RandomAI();
-
-                for (Card c : players[i].handCards()) {
-                    if (restCards.isEmpty()) {
-                        break;
-                    }
-                    copy.players[i].drawCard(restCards.dealCard());
+            for (int i = 0; i < players.length; i++) {
+                if (players[i] instanceof MonteCarloAI) {
+                    copy.players[i] = new RandomAI(players[i].handCards());
+                 //   copy.players[i] = new TwoWaysAI(players[i].handCards());
+                    copy.players[i].giveNumber(i + 1);
+                } else {
+                   // copy.players[i] = new RandomAI(restCards.dealCard(players[i].handCards().size()));
+                       copy.players[i] = new TwoWaysAI(restCards.dealCard(players[i].handCards().size()));
                 }
             }
             copy.bindSuits = Arrays.copyOf(bindSuits, bindSuits.length);
@@ -407,9 +408,10 @@ public class PlayRichest implements Cloneable {
                 }
             }
 
+            //プレイヤーがあがった時の処理
             if (turnPlayer.handCards().isEmpty()) {
                 ranking++;
-                if (turnPlayer.playerNum() == 1) {
+                if (turnPlayer.playerNum() == monte + 1) {
                     return ranking;
                 }
                 Player[] restPlayers = new Player[players.length - 1];
@@ -448,13 +450,12 @@ public class PlayRichest implements Cloneable {
 
     public void playGame() {
 
-        System.out.println("input the number of players");
-        try {
-            playerCount = Integer.parseInt(br.readLine());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+//        System.out.println("input the number of players");
+//        try {
+//            playerCount = Integer.parseInt(br.readLine());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
         gameStart(playerCount);
         System.out.println("\n***Game Start***\n");
         System.out.println("note : input 0 if you pass the turn.\n\n");
@@ -478,12 +479,6 @@ public class PlayRichest implements Cloneable {
                         nums = new int[sNums.length];
                         for (int i = 0; i < sNums.length; i++) {
                             nums[i] = (Integer.parseInt(sNums[i]) - 1);
-                        }
-                    } else if (turnPlayer instanceof MonteCarloAI) {
-                        try {
-                            nums = turnPlayer.chooseCard(clone());
-                        } catch (CloneNotSupportedException ex) {
-                            Logger.getLogger(PlayRichest.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     } else {
                         nums = turnPlayer.chooseCard(this);
@@ -552,12 +547,17 @@ public class PlayRichest implements Cloneable {
                 }
             }
 
+            System.out.println("OK, now the field consists of");
+            printCards(field.nowCards());
+            System.out.println();
+
+            efChecker();
+
             //プレイヤーがあがった時の処理
             if (turnPlayer.handCards().isEmpty()) {
-                System.out.println("The Player wins.");
+                System.out.println("Player" + turnPlayer.playerNum() + " wins.\n");
                 turnPlayer.giveRank(ranking);
                 rankMap.put(ranking, "Player" + turnPlayer.playerNum());
-                System.out.println("rank ------------------------------------------" + ranking);
                 ranking++;
                 Player[] restPlayers = new Player[players.length - 1];
                 int r = 0;
@@ -573,11 +573,11 @@ public class PlayRichest implements Cloneable {
                 playerCount--;
                 if (playerCount == 1) {
                     System.out.println("\n *** Game Set ***\n");
-                    for (int i = 1; i < rankMap.size()+1; i++) {
+                    for (int i = 1; i < rankMap.size() + 1; i++) {
                         String playerName = rankMap.get(i);
-                        System.out.println(playerName + " is rank " + i );
+                        System.out.println(playerName + " is rank " + i);
                     }
-                    System.out.println("Player"+players[0].playerNum()+ " is rank 5");
+                    System.out.println("Player" + players[0].playerNum() + " is rank 5");
                     for (Player p : players) {
                         System.out.println("");
                     }
@@ -585,11 +585,6 @@ public class PlayRichest implements Cloneable {
                 }
             }
 
-            System.out.println("OK, now the field consists of");
-            printCards(field.nowCards());
-            System.out.println();
-
-            efChecker();
             if (s3check) {
                 System.out.println("\n\'Spade Three Counter\'\n");
                 clearField();
