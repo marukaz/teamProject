@@ -5,7 +5,7 @@
  */
 package teamproject;
 
-import java.util.*;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -13,25 +13,11 @@ import java.util.logging.Logger;
  *
  * @author matsumaru
  */
-public class MonteCarloAI extends Player {
-
-    int playOutTimes = 5;
-
-    MonteCarloAI() {
-        super();
-    }
-    MonteCarloAI(int times) {
-        super();
-        playOutTimes = times;
-    }
-
-    MonteCarloAI(List<Card> handCards) {
-        super(handCards);
-    }
-
+public class MonteCarloSuper extends Player {
     @Override
     int[] chooseCard(PlayRichest game) {
-        List<List<Card>> playableCards = game.factPlayCalc(hand);
+        final int PLAYOUTTIMES = 100;
+        List<List<Card>> playableCards = game.playableCalc(hand);
         int rankSumMin = 1000000;
         int[] chosen = {-1};
 
@@ -50,10 +36,10 @@ public class MonteCarloAI extends Player {
                     for (int k = 0; k < size; k++) {
                         nums[k] = hand.indexOf(cards.get(k));
                     }
-                    for (int k = 0; k < playOutTimes; k++) {
+                    for (int k = 0; k < PLAYOUTTIMES; k++) {
                         PlayRichest copyGame;
                         copyGame = game.clone();
-                        rankSum += copyGame.playOut(nums);
+                        rankSum += copyGame.playOutSuper(nums);
                     }
                     if (rankSum < rankSumMin) {
                         rankSumMin = rankSum;
@@ -71,7 +57,7 @@ public class MonteCarloAI extends Player {
                 int[] nums = {-1};
                 int rankSum = 0;
 
-                for (int k = 0; k < playOutTimes; k++) {
+                for (int k = 0; k < PLAYOUTTIMES; k++) {
                     PlayRichest copyGame = game.clone();
                     rankSum += copyGame.playOut(nums);
                 }

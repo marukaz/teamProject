@@ -54,13 +54,13 @@ public class PlayRichest implements Cloneable {
     private void gameStart(int playerCount) {
         players = new Player[playerCount];
         for (int i = 0; i < playerCount; i++) {
-            players[i] = new RealPlayer();
+            players[i] = new MonteCarloAI(100);
             players[i].giveNumber(i + 1);
         }
 
         //AIの読み込みは今のところここに実行前に書いておくようにしてください(´・ω・｀)
         // players[2] = new AIsample();
-        players[monte] = new MonteCarloAI();
+        players[monte] = new MonteCarloSuper();
         players[monte].giveNumber(monte + 1);
         outside:
         while (true) {
@@ -145,12 +145,6 @@ public class PlayRichest implements Cloneable {
 
     private boolean checkBind(List<Card> cards) {
         boolean check = false;
-        if (!isBind) {
-            List<Card> fCards = field.getLastCard(numOfCards);
-            for (int i = 0; i < numOfCards; i++) {
-                bindSuits[i] = fCards.get(i).getSuit();
-            }
-        }
         for (Card c : cards) {
             Suit suit = c.getSuit();
             for (Suit s : bindSuits) {
@@ -304,6 +298,86 @@ public class PlayRichest implements Cloneable {
         return pacards;
     }
 
+    public List<List<Card>> factPlayCalc(List<Card> hand) {
+        List<List<Card>> pacards = new ArrayList<List<Card>>();
+        List<Card> single = new ArrayList<Card>(1);
+        if (isFirst) {
+            List<Card> fpcards = hand;
+            //    printCards(fpcards);
+            List<List<Card>> calced = Calc.quartet(fpcards);
+            pacards.addAll(calced);
+            fpcards.removeAll(calced);
+            //       printCards(fpcards);
+            calced = Calc.triple(fpcards);
+            pacards.addAll(calced);
+            fpcards.removeAll(calced);
+            //        printCards(fpcards);
+            calced = Calc.multi(fpcards);
+            pacards.addAll(calced);
+            fpcards.removeAll(calced);
+            //        printCards(fpcards);
+            calced = Calc.single(fpcards);
+            pacards.addAll(calced);
+            fpcards.removeAll(calced);
+            fpcards = hand;
+            calced = Calc.sequance4(fpcards);
+            pacards.addAll(calced);
+            fpcards.removeAll(calced);
+            calced = Calc.sequance3(fpcards);
+            pacards.addAll(calced);
+        } else {
+            List<Card> subHand = new ArrayList<Card>(hand.size());
+            for (Card c : hand) {
+                if (cardP_Checker(c)) {
+                    subHand.add(c);
+                }
+            }
+            switch (numOfCards) {
+                case 1:
+                    if (field.getLastCard().getSuit() == Suit.JOKER) {
+                        Card spade3 = new Card(Suit.SPADE, 3);
+                        if (hand.contains(spade3)) {
+                            single.add(spade3);
+                            pacards.add(single);
+                        }
+                    } else if (isBind) {
+                        pacards.addAll(Calc.single(subHand, field.getLastCard().getSuit()));
+                    } else {
+                        pacards.addAll(Calc.single(subHand));
+                    }
+                    break;
+
+                case 2:
+                    if (isBind) {
+                        pacards.addAll(Calc.multi(subHand, field.getSuits(2)));
+                    } else {
+                        pacards.addAll(Calc.multi(subHand));
+                    }
+                    break;
+
+                case 3:
+                    if (isBind) {
+                        pacards.addAll(Calc.triple(subHand, field.getSuits(3)));
+                    } else if (isSequance) {
+                        pacards.addAll(Calc.sequance3(subHand));
+                    } else {
+                        pacards.addAll(Calc.triple(subHand));
+                    }
+                    break;
+                case 4:
+                    if (isBind) {
+                        pacards.addAll(Calc.multi(subHand, field.getSuits(4)));
+                    } else if (isSequance) {
+                        pacards.addAll(Calc.sequance4(subHand));
+                    } else {
+                        pacards.addAll(Calc.quartet(subHand));
+                    }
+                    break;
+            }
+        }
+        return pacards;
+    }
+
     private void clearField() {
         field.clear();
         isBind = false;
@@ -326,16 +400,34 @@ public class PlayRichest implements Cloneable {
 
             //プレイアウトのためのクローンなのでプレイヤーを全員RandomAI系にしている
             copy.players = new Player[players.length];
-            for (int i = 0; i < players.length; i++) {
-                if (players[i] instanceof MonteCarloAI) {
-                    copy.players[i] = new RandomAI(players[i].handCards());
-                 //   copy.players[i] = new TwoWaysAI(players[i].handCards());
+            if (players[turnPlayerNum] instanceof MonteCarloSuper) {
+                for (int i = 0; i < players.length; i++) {
+                    Player tPlayer = players[i];
+                    if(i == turnPlayerNum){
+                    copy.players[i] = new MonteCarloAI(tPlayer.handCards());
+                    }else{
+                    copy.players[i] = new MonteCarloAI(restCards.dealCard(tPlayer.handCards().size()));
+                    }
                     copy.players[i].giveNumber(i + 1);
-                } else {
-                   // copy.players[i] = new RandomAI(restCards.dealCard(players[i].handCards().size()));
-                       copy.players[i] = new TwoWaysAI(restCards.dealCard(players[i].handCards().size()));
+                }
+            } else if (players[turnPlayerNum] instanceof MonteCarloAI) {
+                for (int i = 0; i < players.length; i++) {
+                    Player tPlayer = players[i];
+                    if(i == turnPlayerNum){
+                    copy.players[i] = new RandomAI(tPlayer.handCards());
+                    } else{
+                    copy.players[i] = new RandomAI(restCards.dealCard(tPlayer.handCards().size()));
+                    //   copy.players[i] = new TwoWaysAI(players[i].handCards());
+                    }
+                    copy.players[i].giveNumber(i + 1);
+                }
+            } else {
+                for (int i = 0; i < players.length; i++) {
+                    // copy.players[i] = new RandomAI(restCards.dealCard(players[i].handCards().size()));
+                    copy.players[i] = new RandomAI(restCards.dealCard(players[i].handCards().size()));
                 }
             }
+
             copy.bindSuits = Arrays.copyOf(bindSuits, bindSuits.length);
             return copy;
         } catch (CloneNotSupportedException e) {
@@ -394,7 +486,157 @@ public class PlayRichest implements Cloneable {
                 } else {
                     passCount = 0;
                     if (!isFirst && !isBind) {
-                        isBind = checkBind(play);
+                        isBind = true;
+                        boolean check = false;
+                        for (Card c : play) {
+                            Suit suit = c.getSuit();
+                            for (Suit s : bindSuits) {
+                                if (suit == s || suit == Suit.JOKER) {
+                                    check = true;
+                                    break;
+                                }
+                            }
+                            if (!check) {
+                                isBind = false;
+                                break;
+                            }
+                            check = false;
+                        }
+                    }
+                    if (!isBind) {
+                        for (int i = 0; i < play.size(); i++) {
+                            bindSuits[i] = play.get(i).getSuit();
+                        }
+                    }
+                    isFirst = false;
+                    break;
+                }
+            }
+            //カードを出す
+            if (passCount == 0) {
+                field.addCard(turnPlayer.leaveCard(nums));
+                if (numOfCards >= 4) {
+                    isGameRev = !isGameRev;
+                }
+            }
+
+            //プレイヤーがあがった時の処理
+            if (turnPlayer.handCards().isEmpty()) {
+                ranking++;
+                if (turnPlayer.playerNum() == monte + 1) {
+                    return ranking;
+                }
+                Player[] restPlayers = new Player[players.length - 1];
+                int r = 0;
+                for (int i = 0; i < players.length; i++) {
+                    if (i != turnPlayerNum) {
+                        restPlayers[r] = players[i];
+                        r++;
+                    }
+                }
+                players = restPlayers;
+                turn = turnPlayerNum;
+                playerCount--;
+                if (players.length == 1) {
+                    return ranking;
+                }
+            }
+            if (players.length == 1) {
+                return ranking;
+            }
+
+            efCheckerNonPrint();
+            if (s3check) {
+                clearField();
+                s3check = false;
+                turn--;
+            }
+
+            turn++;
+
+            if (passCount == players.length - 1) {
+                clearField();
+            }
+        }
+    }
+
+    public int playOutSuper(int[] firstChoose) {
+        for (Player p : players) {
+            List<Card> hand = new ArrayList<Card>();
+            hand.addAll(p.handCards());
+            p = new MonteCarloAI(hand);
+        }
+        boolean notyet = true;
+        while (true) {
+            turnPlayerNum = turn % playerCount;
+            Player turnPlayer = players[turnPlayerNum];
+            int[] nums = new int[1];
+            while (true) {
+                if (notyet) {
+                    nums = firstChoose;
+                    notyet = false;
+                } else {
+                    nums = turnPlayer.chooseCard(this);
+                }
+
+                if (nums[0] == -1) {
+                    passCount++;
+                    break;
+                }
+
+                List<Card> play = turnPlayer.seeCard(nums);
+                if (isFirst) {
+                    numOfCards = nums.length;
+                    isSequance = checkSQ(play);
+                }
+
+                if (numOfCards != 1) {
+                    changeJKR(play);
+                }
+                if (numOfCards == 1 && !isFirst) {
+                    s3check = s3checker(turnPlayer.seeCard(nums[0]));
+                    if (s3check) {
+                        passCount = 0;
+                        break;
+                    }
+                }
+
+                if (isSequance) {
+                    if (!checkSQ(play)) {
+                    } else if (!isFirst && !cardP_Checker(play.get(0))) {
+                    } else {
+                        passCount = 0;
+                        isFirst = false;
+                        break;
+                    }
+                } else if (!isFirst && !cardP_Checker(play.get(0))) {
+                } else if (nums.length != numOfCards) {
+                } else if (!isCardsSameNum(play)) {
+                } else if (isBind && !checkBind(play)) {
+                } else {
+                    passCount = 0;
+                    if (!isFirst && !isBind) {
+                        isBind = true;
+                        boolean check = false;
+                        for (Card c : play) {
+                            Suit suit = c.getSuit();
+                            for (Suit s : bindSuits) {
+                                if (suit == s || suit == Suit.JOKER) {
+                                    check = true;
+                                    break;
+                                }
+                            }
+                            if (!check) {
+                                isBind = false;
+                                break;
+                            }
+                            check = false;
+                        }
+                    }
+                    if (!isBind) {
+                        for (int i = 0; i < play.size(); i++) {
+                            bindSuits[i] = play.get(i).getSuit();
+                        }
                     }
                     isFirst = false;
                     break;
@@ -468,6 +710,7 @@ public class PlayRichest implements Cloneable {
             System.out.println("Turn of Player" + (turnPlayer.playerNum()));
             printCards(turnPlayer.handCards());
             System.out.println("input the number you want to put counting from the left of your hand.");
+
             // numsにはプログラムとして処理しやすいよう入力-1の値を入れる
             int[] nums = new int[1];
             String[] sNums;
@@ -528,7 +771,27 @@ public class PlayRichest implements Cloneable {
                     } else {
                         passCount = 0;
                         if (!isFirst && !isBind) {
-                            isBind = checkBind(play);
+                            isBind = true;
+                            boolean check = false;
+                            for (Card c : play) {
+                                Suit suit = c.getSuit();
+                                for (Suit s : bindSuits) {
+                                    if (suit == s || suit == Suit.JOKER) {
+                                        check = true;
+                                        break;
+                                    }
+                                }
+                                if (!check) {
+                                    isBind = false;
+                                    break;
+                                }
+                                check = false;
+                            }
+                        }
+                        if (!isBind) {
+                            for (int i = 0; i < play.size(); i++) {
+                                bindSuits[i] = play.get(i).getSuit();
+                            }
                         }
                         isFirst = false;
                         break;

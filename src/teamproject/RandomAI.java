@@ -23,7 +23,7 @@ public class RandomAI extends Player {
 
     @Override
     int[] chooseCard(PlayRichest game) {
-        List<List<Card>> playableCards = game.playableCalc(hand);
+        List<List<Card>> playableCards = game.factPlayCalc(hand);
         int rand = -1 + (int) (Math.random()*(playableCards.size()+1));
         int[] nums = {-1};
         
