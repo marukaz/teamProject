@@ -166,7 +166,12 @@ public class PlayRichest implements Cloneable {
         if (numOfCards < 3) {
             return false;
         }
-        cards.sort((Card a, Card b) -> a.getPow() - b.getPow());
+        cards.sort(new Comparator<Card>() {
+            @Override
+            public int compare(Card a, Card b) {
+                return a.getPow() - b.getPow();
+            }
+        });
         Card card = cards.get(0);
         int size = cards.size();
         for (int i = 1; i < size; i++) {
