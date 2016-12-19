@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 public class PlayRichest implements Cloneable {
 
     // monteは0からはじまるので注意　monte = 0ならばプレイヤー1となる
-    private int monte = 4;
+    private int monte = 3;
 
     private Deck deck;
     public Player[] players;
@@ -34,6 +34,7 @@ public class PlayRichest implements Cloneable {
     int numOfCards = 0;
     int ranking = 1;
     Suit[] bindSuits = new Suit[4];
+    int[] playerRanks = new int[5];
 
     boolean isFirst = true;
     boolean isBind = false;
@@ -54,7 +55,7 @@ public class PlayRichest implements Cloneable {
     private void gameStart(int playerCount) {
         players = new Player[playerCount];
         for (int i = 0; i < playerCount; i++) {
-            players[i] = new MonteCarloAI(100);
+            players[i] = new MonteCarloAI(1);
             players[i].giveNumber(i + 1);
         }
 
@@ -165,20 +166,49 @@ public class PlayRichest implements Cloneable {
         if (numOfCards < 3) {
             return false;
         }
+        cards.sort((Card a, Card b) -> a.getPow() - b.getPow());
         Card card = cards.get(0);
-        for (int i = 1; i < cards.size(); i++) {
+        int size = cards.size();
+        for (int i = 1; i < size; i++) {
             Card nowc = cards.get(i);
             if (nowc.getSuit() == Suit.JOKER) {
-                if (((card.getPow() + 2 != cards.get(i + 1).getPow()) || card.getSuit() != cards.get(i + 1).getSuit()) && (i != cards.size() - 1)) {
-                    return false;
+                /*Jokerを見つけたとき*/
+                for (int j = 0; j < size; j++) {
+                    Card checkerX = cards.get(j);
+                    if (i != j) {/*ジョーカー以外で同じ種類と階段ができる組を探す*/
+                        if (card.getSuit() != checkerX.getSuit()) {
+                            return false;
+                        }
+                        if ((card.getPow() - checkerX.getPow()) > size - 1 || (checkerX.getPow() - card.getPow()) > size - 1) {
+                            return false;
+                        }
+                    }
                 }
             } else if (card.getSuit() == Suit.JOKER) {
-
+                for (int j = 0; j < size; j++) {
+                    for (int k = 0; k < size; k++) {/*次のif文で①同じカード以外②③ジョーカー以外 の場合を除く*/
+                        Card checkerA = cards.get(j);
+                        Card checkerB = cards.get(k);
+                        if (j != k && i != j && i != k) {
+                            if (checkerA.getSuit() != checkerB.getSuit()) {
+                                return false;
+                            }
+                            if ((checkerA.getPow() - checkerB.getPow()) > size - 1 || (checkerB.getPow() - checkerA.getPow()) > size - 1) {
+                                return false;
+                                /*差が3以上のとき階段を作ることができないのでfalseを返す*/
+                            }
+                        }
+                    }
+                }
             } else {
                 if (card.getSuit() != nowc.getSuit()) {
                     return false;
                 }
-                if (card.getPow() + 1 != nowc.getPow()) {
+                if (cards.contains(new Card(Suit.JOKER, 99))) {
+                    if ((card.getPow() - nowc.getPow()) > (size - 1) || (nowc.getPow() - card.getPow()) > (size - 1)) {
+                        return false;
+                    }
+                } else if (card.getPow() + 1 != nowc.getPow()) {
                     return false;
                 }
             }
@@ -403,23 +433,23 @@ public class PlayRichest implements Cloneable {
             if (players[turnPlayerNum] instanceof MonteCarloSuper) {
                 for (int i = 0; i < players.length; i++) {
                     Player tPlayer = players[i];
-                    if(i == turnPlayerNum){
-                    copy.players[i] = new MonteCarloAI(tPlayer.handCards());
-                    }else{
-                    copy.players[i] = new MonteCarloAI(restCards.dealCard(tPlayer.handCards().size()));
+                    if (i == turnPlayerNum) {
+                        copy.players[i] = new MonteCarloAI(tPlayer.handCards());
+                    } else {
+                        copy.players[i] = new MonteCarloAI(restCards.dealCard(tPlayer.handCards().size()));
                     }
-                    copy.players[i].giveNumber(i + 1);
+                    // copy.players[i].giveNumber(i + 1);
                 }
             } else if (players[turnPlayerNum] instanceof MonteCarloAI) {
                 for (int i = 0; i < players.length; i++) {
                     Player tPlayer = players[i];
-                    if(i == turnPlayerNum){
-                    copy.players[i] = new RandomAI(tPlayer.handCards());
-                    } else{
-                    copy.players[i] = new RandomAI(restCards.dealCard(tPlayer.handCards().size()));
-                    //   copy.players[i] = new TwoWaysAI(players[i].handCards());
+                    if (i == turnPlayerNum) {
+                        copy.players[i] = new RandomAI(tPlayer.handCards());
+                    } else {
+                        copy.players[i] = new RandomAI(restCards.dealCard(tPlayer.handCards().size()));
+                        //   copy.players[i] = new TwoWaysAI(players[i].handCards());
                     }
-                    copy.players[i].giveNumber(i + 1);
+                    // copy.players[i].giveNumber(i + 1);
                 }
             } else {
                 for (int i = 0; i < players.length; i++) {
@@ -518,6 +548,7 @@ public class PlayRichest implements Cloneable {
                 if (numOfCards >= 4) {
                     isGameRev = !isGameRev;
                 }
+                efCheckerNonPrint();
             }
 
             //プレイヤーがあがった時の処理
@@ -545,7 +576,6 @@ public class PlayRichest implements Cloneable {
                 return ranking;
             }
 
-            efCheckerNonPrint();
             if (s3check) {
                 clearField();
                 s3check = false;
@@ -808,13 +838,15 @@ public class PlayRichest implements Cloneable {
                     isGameRev = !isGameRev;
                     System.out.println("\n\'Revolution\'\n");
                 }
+                efChecker();
             }
 
             System.out.println("OK, now the field consists of");
             printCards(field.nowCards());
             System.out.println();
-
-            efChecker();
+            if (isSequance) {
+                System.out.println("-----------------------------------------");
+            }
 
             //プレイヤーがあがった時の処理
             if (turnPlayer.handCards().isEmpty()) {
@@ -865,4 +897,144 @@ public class PlayRichest implements Cloneable {
         }
 
     }
+
+    public int[] playGameR() {
+
+        gameStart(playerCount);
+
+        while (true) {
+
+            turnPlayerNum = turn % playerCount;
+            Player turnPlayer = players[turnPlayerNum];
+
+            // numsにはプログラムとして処理しやすいよう入力-1の値を入れる
+            int[] nums = new int[1];
+            String[] sNums;
+            while (true) {
+
+                try {
+                    if (turnPlayer instanceof RealPlayer) {
+                        sNums = br.readLine().split(" ");
+                        nums = new int[sNums.length];
+                        for (int i = 0; i < sNums.length; i++) {
+                            nums[i] = (Integer.parseInt(sNums[i]) - 1);
+                        }
+                    } else {
+                        nums = turnPlayer.chooseCard(this);
+                    }
+
+                    if (nums[0] == -1) {
+                        passCount++;
+                        break;
+                    }
+
+                    List<Card> play = turnPlayer.seeCard(nums);
+                    if (isFirst) {
+                        numOfCards = nums.length;
+                        isSequance = checkSQ(play);
+                    }
+
+                    if (numOfCards != 1) {
+                        changeJKR(play);
+                    }
+                    if (numOfCards == 1 && !isFirst) {
+                        s3check = s3checker(turnPlayer.seeCard(nums[0]));
+                        if (s3check) {
+                            passCount = 0;
+                            break;
+                        }
+                    }
+
+                    if (isSequance) {
+                        if (!checkSQ(play)) {
+                        } else if (!isFirst && !cardP_Checker(play.get(0))) {
+                        } else {
+                            passCount = 0;
+                            isFirst = false;
+                            break;
+                        }
+                    } else if (!isFirst && !cardP_Checker(play.get(0))) {
+                    } else if (nums.length != numOfCards) {
+                    } else if (!isCardsSameNum(play)) {
+                    } else if (isBind && !checkBind(play)) {
+                    } else {
+                        passCount = 0;
+                        if (!isFirst && !isBind) {
+                            isBind = true;
+                            boolean check = false;
+                            for (Card c : play) {
+                                Suit suit = c.getSuit();
+                                for (Suit s : bindSuits) {
+                                    if (suit == s || suit == Suit.JOKER) {
+                                        check = true;
+                                        break;
+                                    }
+                                }
+                                if (!check) {
+                                    isBind = false;
+                                    break;
+                                }
+                                check = false;
+                            }
+                        }
+                        if (!isBind) {
+                            for (int i = 0; i < play.size(); i++) {
+                                bindSuits[i] = play.get(i).getSuit();
+                            }
+                        }
+                        isFirst = false;
+                        break;
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            //カードを出す
+            if (passCount == 0) {
+                field.addCard(turnPlayer.leaveCard(nums));
+                if (numOfCards >= 4) {
+                    isGameRev = !isGameRev;
+                }
+                efCheckerNonPrint();
+            }
+
+            //プレイヤーがあがった時の処理
+            if (turnPlayer.handCards().isEmpty()) {
+                playerRanks[turnPlayer.playerNum() - 1] = ranking;
+                ranking++;
+                Player[] restPlayers = new Player[players.length - 1];
+                int r = 0;
+                for (int i = 0; i < players.length; i++) {
+                    if (i != turnPlayerNum) {
+                        restPlayers[r] = players[i];
+                        r++;
+                    }
+                }
+                players = restPlayers;
+
+                turn = turnPlayerNum - 1;
+                playerCount--;
+                if (playerCount == 1) {
+                    playerRanks[players[0].playerNum() - 1] = ranking;
+                    return playerRanks;
+                }
+            }
+
+            if (s3check) {
+                clearField();
+                s3check = false;
+                turn--;
+            }
+
+            turn++;
+
+            if (passCount == players.length - 1) {
+                clearField();
+            }
+
+        }
+
+    }
+
 }

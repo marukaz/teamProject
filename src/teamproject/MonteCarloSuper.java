@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 public class MonteCarloSuper extends Player {
     @Override
     int[] chooseCard(PlayRichest game) {
-        final int PLAYOUTTIMES = 100;
+        final int PLAYOUTTIMES = 10;
         List<List<Card>> playableCards = game.playableCalc(hand);
         int rankSumMin = 1000000;
         int[] chosen = {-1};

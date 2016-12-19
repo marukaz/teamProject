@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  */
 public class MonteCarloAI extends Player {
 
-    int playOutTimes = 5;
+    int playOutTimes = 1;
 
     MonteCarloAI() {
         super();
@@ -31,7 +31,7 @@ public class MonteCarloAI extends Player {
 
     @Override
     int[] chooseCard(PlayRichest game) {
-        List<List<Card>> playableCards = game.factPlayCalc(hand);
+        List<List<Card>> playableCards = game.playableCalc(hand);
         int rankSumMin = 1000000;
         int[] chosen = {-1};
 
