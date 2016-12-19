@@ -55,13 +55,13 @@ public class PlayRichest implements Cloneable {
     private void gameStart(int playerCount) {
         players = new Player[playerCount];
         for (int i = 0; i < playerCount; i++) {
-            players[i] = new MonteCarloSuper();
+            players[i] = new MonteCarloAI(1);
             players[i].giveNumber(i + 1);
         }
 
         //AIの読み込みは今のところここに実行前に書いておくようにしてください(´・ω・｀)
         // players[2] = new AIsample();
-        players[monte] = new RealPlayer();
+        players[monte] = new MonteCarloAI(3000);
         players[monte].giveNumber(monte + 1);
         outside:
         while (true) {
@@ -303,26 +303,33 @@ public class PlayRichest implements Cloneable {
         List<List<Card>> pacards = new ArrayList<List<Card>>();
         List<Card> single = new ArrayList<Card>(1);
         if (isFirst) {
-            List<Card> fpcards = hand;
-            //    printCards(fpcards);
+            List<Card> fpcards = new ArrayList<Card>();
+            fpcards.addAll(hand);
             List<List<Card>> calced = Calc.quartet(fpcards);
-            fpcards.removeAll(calced);
+            for (List<Card> cs : calced) {
+                fpcards.removeAll(cs);
+            }
             pacards.addAll(calced);
-            //       printCards(fpcards);
             calced = Calc.triple(fpcards);
-            fpcards.removeAll(calced);
+            for (List<Card> cs : calced) {
+                fpcards.removeAll(cs);
+            }
             pacards.addAll(calced);
-            //        printCards(fpcards);
             calced = Calc.multi(fpcards);
-            fpcards.removeAll(calced);
+            for (List<Card> cs : calced) {
+                fpcards.removeAll(cs);
+            }
             pacards.addAll(calced);
-            //        printCards(fpcards);
             calced = Calc.single(fpcards);
-            fpcards.removeAll(calced);
+            for (List<Card> cs : calced) {
+                fpcards.removeAll(cs);
+            }
             pacards.addAll(calced);
             fpcards = hand;
             calced = Calc.sequance4(fpcards);
-            fpcards.removeAll(calced);
+            for (List<Card> cs : calced) {
+                fpcards.removeAll(cs);
+            }
             pacards.addAll(calced);
             calced = Calc.sequance3(fpcards);
             pacards.addAll(calced);
@@ -451,7 +458,12 @@ public class PlayRichest implements Cloneable {
                     nums = turnPlayer.chooseCard(this);
                 }
 
-                if (nums[0] == -1) {
+                List<Integer> list = new ArrayList<Integer>(nums.length);
+                for (int i = 0; i < nums.length; i++) {
+                    list.add(nums[i]);
+                }
+
+                if (list.contains(-1)) {
                     passCount++;
                     break;
                 }
@@ -578,7 +590,12 @@ public class PlayRichest implements Cloneable {
                     nums = turnPlayer.chooseCard(this);
                 }
 
-                if (nums[0] == -1) {
+                List<Integer> list = new ArrayList<Integer>(nums.length);
+                for (int i = 0; i < nums.length; i++) {
+                    list.add(nums[i]);
+                }
+
+                if (list.contains(-1)) {
                     passCount++;
                     break;
                 }
@@ -644,6 +661,7 @@ public class PlayRichest implements Cloneable {
                 if (numOfCards >= 4) {
                     isGameRev = !isGameRev;
                 }
+                efCheckerNonPrint();
             }
 
             //プレイヤーがあがった時の処理
@@ -671,7 +689,6 @@ public class PlayRichest implements Cloneable {
                 return ranking;
             }
 
-            efCheckerNonPrint();
             if (s3check) {
                 clearField();
                 s3check = false;
@@ -723,7 +740,12 @@ public class PlayRichest implements Cloneable {
                         nums = turnPlayer.chooseCard(this);
                     }
 
-                    if (nums[0] == -1) {
+                    List<Integer> list = new ArrayList<Integer>(nums.length);
+                    for (int i = 0; i < nums.length; i++) {
+                        list.add(nums[i]);
+                    }
+
+                    if (list.contains(-1)) {
                         passCount++;
                         break;
                     }
@@ -807,9 +829,6 @@ public class PlayRichest implements Cloneable {
             System.out.println("OK, now the field consists of");
             printCards(field.nowCards());
             System.out.println();
-            if (isSequance) {
-                System.out.println("-----------------------------------------");
-            }
 
             //プレイヤーがあがった時の処理
             if (turnPlayer.handCards().isEmpty()) {
@@ -886,7 +905,12 @@ public class PlayRichest implements Cloneable {
                         nums = turnPlayer.chooseCard(this);
                     }
 
-                    if (nums[0] == -1) {
+                    List<Integer> list = new ArrayList<Integer>(nums.length);
+                    for (int i = 0; i < nums.length; i++) {
+                        list.add(nums[i]);
+                    }
+
+                    if (list.contains(-1)) {
                         passCount++;
                         break;
                     }
@@ -941,7 +965,7 @@ public class PlayRichest implements Cloneable {
                             for (int i = 0; i < play.size(); i++) {
                                 bindSuits[i] = play.get(i).getSuit();
                             }
-                            for(int k = play.size(); k<4; k++){
+                            for (int k = play.size(); k < 4; k++) {
                                 bindSuits[k] = null;
                             }
                         }

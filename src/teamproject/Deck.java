@@ -13,13 +13,14 @@ import java.util.*;
  */
 public class Deck {
 
-     List<Card> deck;
+    List<Card> deck;
     private int joker;
 
     public Deck(int joker) {
         this.deck = new ArrayList<Card>();
         this.joker = joker;
     }
+
     public Deck(int joker, List<Card> cards) {
         this.deck = new ArrayList<Card>();
         deck.addAll(cards);
@@ -52,12 +53,18 @@ public class Deck {
     public Card dealCard() {
         return deck.remove(0);
     }
-    
+
     public List<Card> dealCard(int num) {
         List<Card> deals = new ArrayList<Card>();
-        for(int i=0; i<num; i++){
+        for (int i = 0; i < num; i++) {
             deals.add(deck.remove(0));
         }
+        Collections.sort(deals, new Comparator<Card>() {
+            @Override
+            public int compare(Card a, Card b) {
+                return a.getPow() - b.getPow();
+            }
+        });
         return deals;
     }
 
@@ -68,8 +75,8 @@ public class Deck {
     public int size() {
         return deck.size();
     }
-    
-    public void remove(List<Card> cards){
+
+    public void remove(List<Card> cards) {
         deck.removeAll(cards);
     }
 }
