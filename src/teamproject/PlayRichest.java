@@ -55,7 +55,7 @@ public class PlayRichest implements Cloneable {
     private void gameStart(int playerCount) {
         players = new Player[playerCount];
         for (int i = 0; i < playerCount; i++) {
-            players[i] = new MonteCarloAI(1);
+            players[i] = new MonteCarloSuper();
             players[i].giveNumber(i + 1);
         }
 
@@ -306,24 +306,24 @@ public class PlayRichest implements Cloneable {
             List<Card> fpcards = hand;
             //    printCards(fpcards);
             List<List<Card>> calced = Calc.quartet(fpcards);
-            pacards.addAll(calced);
             fpcards.removeAll(calced);
+            pacards.addAll(calced);
             //       printCards(fpcards);
             calced = Calc.triple(fpcards);
-            pacards.addAll(calced);
             fpcards.removeAll(calced);
+            pacards.addAll(calced);
             //        printCards(fpcards);
             calced = Calc.multi(fpcards);
-            pacards.addAll(calced);
             fpcards.removeAll(calced);
+            pacards.addAll(calced);
             //        printCards(fpcards);
             calced = Calc.single(fpcards);
-            pacards.addAll(calced);
             fpcards.removeAll(calced);
+            pacards.addAll(calced);
             fpcards = hand;
             calced = Calc.sequance4(fpcards);
-            pacards.addAll(calced);
             fpcards.removeAll(calced);
+            pacards.addAll(calced);
             calced = Calc.sequance3(fpcards);
             pacards.addAll(calced);
         } else {

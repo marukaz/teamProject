@@ -11,11 +11,12 @@ import java.util.List;
  *
  * @author matsumaru
  */
-public class TwoWaysAI extends Player{
+public class TwoWaysAI extends Player {
+
     TwoWaysAI() {
         super();
     }
-    
+
     TwoWaysAI(List<Card> handCards) {
         super(handCards);
     }
@@ -25,13 +26,12 @@ public class TwoWaysAI extends Player{
         List<List<Card>> playableCards = game.playableCalc(hand);
         double rand = Math.random();
         int[] nums = {-1};
+        
         if (playableCards.isEmpty() || playableCards.get(0).isEmpty()) {
             return nums;
         }
 
-        if (!game.isFirst && rand > 0.9) {
-            return nums;
-        } else if (rand > 0.5) {
+        if (rand > 0.5) {
             List<Card> playCards = playableCards.get(0);
             nums = new int[playCards.size()];
             for (int i = 0; i < playCards.size(); i++) {
