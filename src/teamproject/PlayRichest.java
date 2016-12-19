@@ -94,40 +94,6 @@ public class PlayRichest implements Cloneable {
         System.out.println();
     }
 
-    private void changeJKR(List<Card> cards) {
-        int cardPow = 0;
-
-        if (isSequance) {
-            int position = 0;
-            for (Card c : cards) {
-                if (c.getSuit() != Suit.JOKER) {
-                    cardPow = c.getPow();
-                    position = cards.indexOf(c);
-                    break;
-                }
-            }
-            for (int i = 0; i < cards.size(); i++) {
-                if (cards.get(i).getSuit() == Suit.JOKER) {
-                    cards.get(i).changePow(cardPow + i - position);
-
-                }
-            }
-
-        } else {
-            for (Card c : cards) {
-                if (c.getSuit() != Suit.JOKER) {
-                    cardPow = c.getPow();
-                    break;
-                }
-            }
-            for (Card c : cards) {
-                if (c.getSuit() == Suit.JOKER) {
-                    c.changePow(cardPow);
-                }
-            }
-        }
-    }
-
     private boolean isCardsSameNum(List<Card> cards) {
         int num = -1;
         for (Card c : cards) {
@@ -166,7 +132,7 @@ public class PlayRichest implements Cloneable {
         if (numOfCards < 3) {
             return false;
         }
-        cards.sort(new Comparator<Card>() {
+        Collections.sort(cards, new Comparator<Card>() {
             @Override
             public int compare(Card a, Card b) {
                 return a.getPow() - b.getPow();
@@ -495,9 +461,6 @@ public class PlayRichest implements Cloneable {
                     isSequance = checkSQ(play);
                 }
 
-                if (numOfCards != 1) {
-                    changeJKR(play);
-                }
                 if (numOfCards == 1 && !isFirst) {
                     s3check = s3checker(turnPlayer.seeCard(nums[0]));
                     if (s3check) {
@@ -625,9 +588,6 @@ public class PlayRichest implements Cloneable {
                     isSequance = checkSQ(play);
                 }
 
-                if (numOfCards != 1) {
-                    changeJKR(play);
-                }
                 if (numOfCards == 1 && !isFirst) {
                     s3check = s3checker(turnPlayer.seeCard(nums[0]));
                     if (s3check) {
@@ -774,9 +734,6 @@ public class PlayRichest implements Cloneable {
                         printCards(play);
                     }
 
-                    if (numOfCards != 1) {
-                        changeJKR(play);
-                    }
                     if (numOfCards == 1 && !isFirst) {
                         s3check = s3checker(turnPlayer.seeCard(nums[0]));
                         if (s3check) {
@@ -939,9 +896,6 @@ public class PlayRichest implements Cloneable {
                         isSequance = checkSQ(play);
                     }
 
-                    if (numOfCards != 1) {
-                        changeJKR(play);
-                    }
                     if (numOfCards == 1 && !isFirst) {
                         s3check = s3checker(turnPlayer.seeCard(nums[0]));
                         if (s3check) {
