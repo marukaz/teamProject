@@ -31,7 +31,7 @@ public class MonteCarloAI extends Player {
 
     @Override
     int[] chooseCard(PlayRichest game) {
-        List<List<Card>> playableCards = game.playableCalc(hand);
+        List<List<Card>> playableCards = game.factPlayCalc(hand);
         int rankSumMin = 1000000;
         int[] chosen = {-1};
 

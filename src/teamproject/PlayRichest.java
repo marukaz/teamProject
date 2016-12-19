@@ -61,7 +61,7 @@ public class PlayRichest implements Cloneable {
 
         //AIの読み込みは今のところここに実行前に書いておくようにしてください(´・ω・｀)
         // players[2] = new AIsample();
-        players[monte] = new MonteCarloSuper();
+        players[monte] = new RealPlayer();
         players[monte].giveNumber(monte + 1);
         outside:
         while (true) {
@@ -381,6 +381,7 @@ public class PlayRichest implements Cloneable {
 
     private void clearField() {
         field.clear();
+        bindSuits = new Suit[4];
         isBind = false;
         is11Rev = false;
         isSequance = false;
@@ -939,6 +940,9 @@ public class PlayRichest implements Cloneable {
                         if (!isBind) {
                             for (int i = 0; i < play.size(); i++) {
                                 bindSuits[i] = play.get(i).getSuit();
+                            }
+                            for(int k = play.size(); k<4; k++){
+                                bindSuits[k] = null;
                             }
                         }
                         isFirst = false;
