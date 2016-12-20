@@ -14,9 +14,10 @@ import java.util.logging.Logger;
  * @author matsumaru
  */
 public class MonteCarloSuper extends Player {
+
     @Override
     int[] chooseCard(PlayRichest game) {
-        final int PLAYOUTTIMES = 100;
+        final int PLAYOUTTIMES = 50;
         List<List<Card>> playableCards = game.factPlayCalc(hand);
         int rankSumMin = 1000000;
         int[] chosen = {-1};
@@ -24,7 +25,6 @@ public class MonteCarloSuper extends Player {
         if (playableCards.isEmpty() || playableCards.get(0).isEmpty()) {
             return chosen;
         }
-
         for (int i = 0; i < playableCards.size(); i++) {
             try {
                 List<Card> cards = playableCards.get(i);
@@ -39,7 +39,8 @@ public class MonteCarloSuper extends Player {
                     for (int k = 0; k < PLAYOUTTIMES; k++) {
                         PlayRichest copyGame;
                         copyGame = game.clone();
-                        rankSum += copyGame.playOutSuper(nums);
+                        Deck deck = game.restDeck();
+                        rankSum += copyGame.playOutSuper(nums, deck);
                     }
                     if (rankSum < rankSumMin) {
                         rankSumMin = rankSum;

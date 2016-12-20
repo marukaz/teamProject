@@ -55,13 +55,13 @@ public class PlayRichest implements Cloneable {
     private void gameStart(int playerCount) {
         players = new Player[playerCount];
         for (int i = 0; i < playerCount; i++) {
-            players[i] = new MonteCarloAI(1);
+            players[i] = new MonteCarloAI(10);
             players[i].giveNumber(i + 1);
         }
 
         //AIの読み込みは今のところここに実行前に書いておくようにしてください(´・ω・｀)
         // players[2] = new AIsample();
-        players[monte] = new MonteCarloAI(3000);
+        players[monte] = new MonteCarloSuper();
         players[monte].giveNumber(monte + 1);
         outside:
         while (true) {
@@ -395,6 +395,15 @@ public class PlayRichest implements Cloneable {
         isFirst = true;
     }
 
+    public Deck restDeck() {
+        Deck restCards = new Deck(JOKER);
+        restCards.deckMake();
+        restCards.remove(field.allTimeCards());
+        //プレイアウトのためのクローンなのでデッキからターンプレイヤーの手札を除いている
+        restCards.remove(players[turnPlayerNum].handCards());
+        return restCards;
+    }
+
     @Override
     public PlayRichest clone() throws CloneNotSupportedException {
         try {
@@ -414,7 +423,9 @@ public class PlayRichest implements Cloneable {
                     Player tPlayer = players[i];
                     if (i == turnPlayerNum) {
                         copy.players[i] = new MonteCarloAI(tPlayer.handCards());
+                        copy.players[i].giveNumber(i + 1);
                     } else {
+                        // copy.players[i] = new MonteCarloAI();
                         copy.players[i] = new MonteCarloAI(restCards.dealCard(tPlayer.handCards().size()));
                     }
                     // copy.players[i].giveNumber(i + 1);
@@ -424,16 +435,16 @@ public class PlayRichest implements Cloneable {
                     Player tPlayer = players[i];
                     if (i == turnPlayerNum) {
                         copy.players[i] = new RandomAI(tPlayer.handCards());
+                        copy.players[i].giveNumber(i + 1);
                     } else {
                         copy.players[i] = new RandomAI(restCards.dealCard(tPlayer.handCards().size()));
                         //   copy.players[i] = new TwoWaysAI(players[i].handCards());
                     }
-                    // copy.players[i].giveNumber(i + 1);
                 }
             } else {
                 for (int i = 0; i < players.length; i++) {
-                    // copy.players[i] = new RandomAI(restCards.dealCard(players[i].handCards().size()));
                     copy.players[i] = new RandomAI(restCards.dealCard(players[i].handCards().size()));
+                    // copy.players[i].giveNumber(i + 1);
                 }
             }
 
@@ -469,6 +480,7 @@ public class PlayRichest implements Cloneable {
                 }
 
                 List<Card> play = turnPlayer.seeCard(nums);
+
                 if (isFirst) {
                     numOfCards = nums.length;
                     isSequance = checkSQ(play);
@@ -534,10 +546,10 @@ public class PlayRichest implements Cloneable {
 
             //プレイヤーがあがった時の処理
             if (turnPlayer.handCards().isEmpty()) {
-                ranking++;
                 if (turnPlayer.playerNum() == monte + 1) {
                     return ranking;
                 }
+                ranking++;
                 Player[] restPlayers = new Player[players.length - 1];
                 int r = 0;
                 for (int i = 0; i < players.length; i++) {
@@ -552,9 +564,6 @@ public class PlayRichest implements Cloneable {
                 if (players.length == 1) {
                     return ranking;
                 }
-            }
-            if (players.length == 1) {
-                return ranking;
             }
 
             if (s3check) {
@@ -571,11 +580,13 @@ public class PlayRichest implements Cloneable {
         }
     }
 
-    public int playOutSuper(int[] firstChoose) {
+    public int playOutSuper(int[] firstChoose, Deck deck) {
         for (Player p : players) {
             List<Card> hand = new ArrayList<Card>();
             hand.addAll(p.handCards());
-            p = new MonteCarloAI(hand);
+            if (p != players[turnPlayerNum]) {
+                p = new MonteCarloAI(deck.dealCard(hand.size()));
+            }
         }
         boolean notyet = true;
         while (true) {
@@ -666,10 +677,11 @@ public class PlayRichest implements Cloneable {
 
             //プレイヤーがあがった時の処理
             if (turnPlayer.handCards().isEmpty()) {
-                ranking++;
+                turnPlayer.giveRank(ranking);
                 if (turnPlayer.playerNum() == monte + 1) {
                     return ranking;
                 }
+                ranking++;
                 Player[] restPlayers = new Player[players.length - 1];
                 int r = 0;
                 for (int i = 0; i < players.length; i++) {
@@ -684,9 +696,6 @@ public class PlayRichest implements Cloneable {
                 if (players.length == 1) {
                     return ranking;
                 }
-            }
-            if (players.length == 1) {
-                return ranking;
             }
 
             if (s3check) {
