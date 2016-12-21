@@ -456,6 +456,7 @@ public class PlayRichest implements Cloneable {
     }
 
     public int playOut(int[] firstChoose) {
+        int tpn = turnPlayerNum+1;
         boolean notyet = true;
         while (true) {
             turnPlayerNum = turn % playerCount;
@@ -546,7 +547,7 @@ public class PlayRichest implements Cloneable {
 
             //プレイヤーがあがった時の処理
             if (turnPlayer.handCards().isEmpty()) {
-                if (turnPlayer.playerNum() == monte + 1) {
+                if (turnPlayer.playerNum() == tpn + 1) {
                     return ranking;
                 }
                 ranking++;
