@@ -27,6 +27,7 @@ public class TheRichest {
             for (int k = 0; k < 5; k++) {
                 ranks[k] += r[k];
             }
+            System.out.println(i);
         }
         for (int k = 0; k < 5; k++) {
             System.out.println(ranks[k]);

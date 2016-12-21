@@ -55,7 +55,7 @@ public class PlayRichest implements Cloneable {
     private void gameStart(int playerCount) {
         players = new Player[playerCount];
         for (int i = 0; i < playerCount; i++) {
-            players[i] = new MonteCarloAI(10);
+            players[i] = new RandomAI();
             players[i].giveNumber(i + 1);
         }
 
