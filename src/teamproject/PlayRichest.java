@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 public class PlayRichest implements Cloneable {
 
     // monteは0からはじまるので注意　monte = 0ならばプレイヤー1となる
-    private int monte = 3;
+    private int monte = 0;
 
     private Deck deck;
     public Player[] players;
@@ -55,13 +55,13 @@ public class PlayRichest implements Cloneable {
     private void gameStart(int playerCount) {
         players = new Player[playerCount];
         for (int i = 0; i < playerCount; i++) {
-            players[i] = new RandomAI();
+            players[i] = new MonteCarloSuper();
             players[i].giveNumber(i + 1);
         }
 
         //AIの読み込みは今のところここに実行前に書いておくようにしてください(´・ω・｀)
         // players[2] = new AIsample();
-        players[monte] = new MonteCarloSuper();
+        players[monte] = new RealPlayer();
         players[monte].giveNumber(monte + 1);
         outside:
         while (true) {
@@ -581,6 +581,7 @@ public class PlayRichest implements Cloneable {
     }
 
     public int playOutSuper(int[] firstChoose, Deck deck) {
+        int tpn = turnPlayerNum+1;
         for (Player p : players) {
             List<Card> hand = new ArrayList<Card>();
             hand.addAll(p.handCards());
@@ -678,7 +679,7 @@ public class PlayRichest implements Cloneable {
             //プレイヤーがあがった時の処理
             if (turnPlayer.handCards().isEmpty()) {
                 turnPlayer.giveRank(ranking);
-                if (turnPlayer.playerNum() == monte + 1) {
+                if (turnPlayer.playerNum() == tpn) {
                     return ranking;
                 }
                 ranking++;

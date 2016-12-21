@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  */
 public class MonteCarloAI extends Player {
 
-    int playOutTimes = 3;
+    int playOutTimes = 5;
 
     MonteCarloAI() {
         super();
